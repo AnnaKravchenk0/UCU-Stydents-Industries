@@ -5,10 +5,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from database import Base, engine
 
-from routers import users
+from routers import users, movies
 
 # Command to start backend
-# >>> uvicorn main:app --reload
+# uvicorn main:app --reload
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
@@ -31,3 +31,4 @@ app.add_middleware(
 )
 
 app.include_router(users.router, prefix="/users", tags=["users"])
+app.include_router(movies.router, prefix="/movies", tags=["movies"])

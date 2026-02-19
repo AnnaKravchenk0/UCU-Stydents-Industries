@@ -1,0 +1,8 @@
+# SECRETE_KEYS
+# .env
+
+# Database
+*.db
+
+# Python trash
+__pycache__/

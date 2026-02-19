@@ -1,26 +1,19 @@
 from __future__ import annotations
 
-from sqlalchemy import ForeignKey, Integer, String, Table, Column
+from sqlalchemy import ForeignKey, Integer, String, Table, Column, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database import Base
 
-user_friends = Table(
-    'user_friends',
-    Base.metadata,
-    Column('user_id', Integer, ForeignKey('users.id'), primary_key=True),
-    Column('friend_id', Integer, ForeignKey('users.id'), primary_key=True)
-)
+# user_friends = Table(
+#     'user_friends',
+#     Base.metadata,
+#     Column('user_id', Integer, ForeignKey('users.id'), primary_key=True),
+#     Column('friend_id', Integer, ForeignKey('users.id'), primary_key=True)
+# )
 
 likes = Table(
     'likes',
-    Base.metadata,
-    Column('user_id', Integer, ForeignKey('users.id'), primary_key=True),
-    Column('movie_id', Integer, ForeignKey('movies.id'), primary_key=True)
-)
-
-dislikes = Table(
-    'dislikes',
     Base.metadata,
     Column('user_id', Integer, ForeignKey('users.id'), primary_key=True),
     Column('movie_id', Integer, ForeignKey('movies.id'), primary_key=True)
@@ -38,18 +31,6 @@ class User(Base):
         secondary=likes,
         back_populates='liked_by'
     )
-    disliked_movies: Mapped[list[Movie]] = relationship(
-        secondary=dislikes,
-        back_populates='disliked_by'
-    )
-
-    friends_with: Mapped[list["User"]] = relationship(
-        "User",
-        secondary=user_friends,
-        primaryjoin=id == user_friends.columns.user_id,
-        secondaryjoin=id == user_friends.columns.friend_id,
-        backref="friend_of",
-    )
 
 class Movie(Base):
     __tablename__ = 'movies'
@@ -59,7 +40,14 @@ class Movie(Base):
         secondary=likes,
         back_populates='liked_movies'
     )
-    disliked_by: Mapped[list[User]] = relationship(
-        secondary=dislikes,
-        back_populates='disliked_movies'
-    )
+
+class Friendship(Base):
+    __tablename__ = 'user_friends'
+
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), primary_key=True)
+    friend_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), primary_key=True)
+
+    is_accepted: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    user: Mapped["User"] = relationship("User", foreign_keys=[user_id])
+    friend: Mapped["User"] = relationship("User", foreign_keys=[friend_id])
