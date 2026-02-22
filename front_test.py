@@ -224,3 +224,67 @@ if st.session_state.movies_list:
                 st.warning("Це останній фільм у списку.")
 else:
     st.info("Натисніть кнопку вище, щоб завантажити дані.")
+
+# ---------------- MOVIES ENDPOINTS TEST ----------------
+
+st.divider()
+st.header("🎬 Movies Endpoints Testing")
+
+if not st.session_state.token:
+    st.info("Login first to test movie endpoints.")
+else:
+    headers = {"Authorization": f"Bearer {st.session_state.token}"}
+
+    # -------- LIKE MOVIE --------
+    st.subheader("❤️ Like Movie")
+
+    movie_id = st.number_input("Movie ID", min_value=1, step=1, key="like_movie_id")
+    movie_name = st.text_input("Movie name", key="like_movie_name")
+    poster_path = st.text_input("Poster path", key="like_movie_poster")
+
+    if st.button("Like Movie"):
+        payload = {
+            "id": movie_id,
+            "movie_name": movie_name,
+            "poster_path": poster_path,
+        }
+
+        r = requests.get(
+            f"{BASE_URL}/movies/like-movie",
+            json=payload,
+            headers=headers,
+            timeout=5,
+        )
+
+        st.write(r.status_code)
+        st.json(r.json())
+
+    # -------- GET LIKED MOVIES --------
+    st.subheader("📂 Get Liked Movies")
+
+    liked_user_id = st.number_input("User ID", min_value=1, step=1, key="liked_user_id")
+
+    if st.button("Get liked movies"):
+        r = requests.get(
+            f"{BASE_URL}/movies/{liked_user_id}/liked",
+            headers=headers,
+            timeout=5,
+        )
+
+        st.write(r.status_code)
+        st.json(r.json())
+
+    # -------- COMMON MOVIES --------
+    st.subheader("👯 Common Movies")
+
+    friend_id = st.number_input("Friend ID", min_value=1, step=1, key="common_friend_id")
+
+    if st.button("Get common movies"):
+        r = requests.get(
+            f"{BASE_URL}/movies/common/{friend_id}",
+            headers=headers,
+            timeout=5,
+        )
+
+        st.write(r.status_code)
+        st.json(r.json())

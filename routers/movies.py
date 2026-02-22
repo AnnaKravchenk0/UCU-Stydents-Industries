@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from get_movie_info import client
 from database import get_db
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 import models
 
 from schemas import MoviePublic
@@ -26,6 +27,32 @@ def get_movies(
 ):
     return client.get_movies(name=name, year=year, page=page)
 
+@router.get("/like-movie")
+async def like_movie(
+    movie_data: MoviePublic,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: CurrentUser
+):
+    result = await db.execute(select(models.Movie).where(models.Movie.id == movie_data.id))
+    movie = result.scalars().first()
+
+    if not movie:
+        movie = models.Movie(id=movie_data.id, poster_path=movie_data.poster_path, movie_name=movie_data.movie_name)
+        db.add(movie)
+        await db.flush()
+
+    result = await db.execute(
+        select(models.User)
+        .options(selectinload(models.User.liked_movies))
+        .where(models.User.id == current_user.id)
+    )
+    user = result.scalars().first()
+
+    if movie not in user.liked_movies:
+        user.liked_movies.append(movie)
+        await db.commit()
+        return {"message": "Movie added to favorites"}
+    return {"message": "Movie already in favorites"}
 
 @router.get("/{user_id}/liked", response_model=list[MoviePublic])
 async def get_liked_movies(
