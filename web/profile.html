@@ -8,14 +8,13 @@
     <style>
         .profile-container {
             display: grid;
-            grid-template-columns: 350px 1fr;
+            grid-template-columns: 320px 1fr;
             gap: 30px;
             max-width: 1400px;
             margin: 40px auto;
             padding: 0 20px;
         }
 
-        /* Список друзів */
         .friends-sidebar {
             background: rgba(36, 30, 56, 0.8);
             backdrop-filter: blur(20px);
@@ -36,63 +35,42 @@
             transition: 0.3s;
             border: 1px solid transparent;
         }
+        .friend-item:hover  { background: rgba(255,255,255,0.05); }
+        .friend-item.active { background: rgba(184,59,136,0.2); border-color: var(--accent-pink); }
 
-        .friend-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-        }
+        .avatar-circle { width:45px; height:45px; background:var(--accent-pink); border-radius:50%; flex-shrink:0; }
 
-        .friend-item.active {
-            background: rgba(184, 59, 136, 0.2);
-            border-color: var(--accent-pink);
-        }
-
-        .avatar-circle {
-            width: 45px;
-            height: 45px;
-            background: var(--accent-pink);
-            border-radius: 50%;
-        }
-
-        /* Контент з фільмами */
         .movies-feed {
             background: rgba(36, 30, 56, 0.5);
             padding: 40px;
             border-radius: 40px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
         .feed-header {
             margin-bottom: 30px;
             padding-bottom: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
         .movies-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
             gap: 25px;
         }
 
-        .movie-card {
-            background: #1a162b;
-            border-radius: 20px;
-            overflow: hidden;
-            transition: 0.3s;
-            animation: fadeIn 0.5s ease;
+        .movie-card { background:#1a162b; border-radius:20px; overflow:hidden; transition:0.3s; }
+        .movie-card:hover { transform:translateY(-5px); }
+        .movie-poster { width:100%; height:260px; object-fit:cover; display:block; }
+        .movie-poster-placeholder {
+            width:100%; height:260px; background:#2a2440;
+            display:flex; align-items:center; justify-content:center;
+            color:#aaa; font-size:0.9rem; padding:10px; text-align:center;
         }
+        .movie-info { padding:15px; }
 
-        .movie-card:hover { transform: translateY(-5px); }
-        .movie-poster { width: 100%; height: 280px; object-fit: cover; }
-        .movie-info { padding: 15px; }
-
-        /* .smth {
-            margin-right: 450px;
-        } */
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .empty-msg { color:var(--text-sec); text-align:center; padding:40px 0; }
+        .empty-msg a { color:var(--accent-pink); text-decoration:none; }
     </style>
 </head>
 <body>
@@ -100,91 +78,139 @@
         <nav class="top-nav">
             <a href="index.html" class="logo">MovieMatch</a>
             <ul class="nav-links">
-                <li class="---"><a href="index.html" class="active">Popular</a></li>
-                <li class="---"><a href="index.html" class="active">Contacts</a></li>
-                <li class="---"><a href="index.html" class="active">About</a></li>
-                <li><a href="friends.html">Search Friends</a></li>
+                <li><a href="index.html">Popular</a></li>
+                <li><a href="index.html#about">About</a></li>
+                <li><a href="index.html#contacts">Contacts</a></li>
+                <li><a href="search_friends.html">Search Friends</a></li>
                 <li><a href="my_films.html">My Collection</a></li>
-                <li class="smth"><a href="profile.html" class="active">Profile</a></li>
-                <!-- вставити фільми та навігацію -->
+                <li><a href="profile.html" class="active" style="color:var(--accent-pink);">Friends</a></li>
             </ul>
         </nav>
     </header>
 
     <div class="profile-container">
+
         <aside class="friends-sidebar">
-            <h2 style="margin-bottom: 20px;">Choose a Friend</h2>
+            <h2 style="margin-bottom:20px;">My Friends</h2>
             <div id="friends-list">
-                </div>
+                <p style="color:var(--text-sec);">Loading...</p>
+            </div>
         </aside>
 
         <main class="movies-feed">
             <div class="feed-header">
-                <h1 id="selected-friend-name">Select a friend to see their likes</h1>
-                <p id="selected-friend-stats" style="color: var(--text-sec);"></p>
+                <h1 id="selected-friend-name">Select a friend to see their movies</h1>
+                <p id="selected-friend-stats" style="color:var(--text-sec); margin-top:8px;"></p>
             </div>
-
-            <div class="movies-grid" id="movies-container">
-                </div>
+            <div class="movies-grid" id="movies-container"></div>
         </main>
+
     </div>
 
     <script>
-        // Імітація бази даних друзів та їх вподобань
-        const data = {
-            "Alex_MovieBuff": [
-                { title: "Interstellar", img: "https://images.vfl.ru/ii/1604519961/447a760d/32185599.jpg", year: 2014 },
-                { title: "Inception", img: "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_.jpg", year: 2010 }
-            ],
-            "Sarah_Cine": [
-                { title: "Barbie", img: "https://m.media-amazon.com/images/M/MV5BNjU3N2QxNzYtMjk1NC00MTc4LTk1NTQtMmUxN2IyNjYwZGQ5XkEyXkFqcGdeQXVyOTgxOTIzMTY@._V1_.jpg", year: 2023 }
-            ],
-            "Max_Classic": [
-                { title: "The Dark Knight", img: "https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_.jpg", year: 2008 },
-                { title: "Interstellar", img: "https://images.vfl.ru/ii/1604519961/447a760d/32185599.jpg", year: 2014 }
-            ]
-        };
+        const BASE_URL = 'http://127.0.0.1:8000';
 
-        const friendsList = document.getElementById('friends-list');
-        const moviesContainer = document.getElementById('movies-container');
-        const friendNameTitle = document.getElementById('selected-friend-name');
+        async function init() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
 
-        // Рендеримо список друзів
-        Object.keys(data).forEach(name => {
-            const div = document.createElement('div');
-            div.className = 'friend-item';
-            div.innerHTML = `
-                <div class="avatar-circle"></div>
-                <div style="font-weight: bold;">${name}</div>
-            `;
-            div.onclick = () => selectFriend(name, div);
-            friendsList.appendChild(div);
-        });
+            try {
+                // GET /users/friends/my — список моїх друзів
+                const resp = await fetch(`${BASE_URL}/users/friends/my`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
 
-        function selectFriend(name, element) {
-            // Підсвічуємо вибраного друга
-            document.querySelectorAll('.friend-item').forEach(item => item.classList.remove('active'));
-            element.classList.add('active');
+                if (resp.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = 'login.html';
+                    return;
+                }
 
-            // Оновлюємо заголовок
-            friendNameTitle.innerText = `${name}'s Favorites`;
-            document.getElementById('selected-friend-stats').innerText = `${data[name].length} movies liked`;
+                const friends = await resp.json();
+                renderFriends(friends);
 
-            // Очищуємо та рендеримо фільми саме цього друга
-            moviesContainer.innerHTML = '';
-            data[name].forEach(movie => {
-                const movieDiv = document.createElement('div');
-                movieDiv.className = 'movie-card';
-                movieDiv.innerHTML = `
-                    <img src="${movie.img}" class="movie-poster">
-                    <div class="movie-info">
-                        <div style="font-weight: bold;">${movie.title}</div>
-                        <div style="font-size: 0.8rem; color: var(--text-sec);">${movie.year}</div>
-                    </div>
-                `;
-                moviesContainer.appendChild(movieDiv);
+            } catch (e) {
+                window.location.href = 'p_error.html';
+            }
+        }
+
+        function renderFriends(friends) {
+            const list = document.getElementById('friends-list');
+
+            if (!friends.length) {
+                list.innerHTML = `
+                    <div class="empty-msg">
+                        No friends yet.<br>
+                        <a href="search_friends.html">Find some!</a>
+                    </div>`;
+                return;
+            }
+
+            list.innerHTML = '';
+            friends.forEach(friend => {
+                const div = document.createElement('div');
+                div.className = 'friend-item';
+                div.innerHTML = `
+                    <div class="avatar-circle"></div>
+                    <div>
+                        <div style="font-weight:bold;">${friend.username}</div>
+                        <div style="font-size:0.8rem; color:var(--text-sec);">ID: ${friend.id}</div>
+                    </div>`;
+                div.onclick = () => selectFriend(friend, div);
+                list.appendChild(div);
             });
         }
+
+        async function selectFriend(friend, element) {
+            // Підсвічуємо вибраного друга
+            document.querySelectorAll('.friend-item').forEach(i => i.classList.remove('active'));
+            element.classList.add('active');
+
+            document.getElementById('selected-friend-name').textContent = `${friend.username}'s Favorites`;
+            document.getElementById('selected-friend-stats').textContent  = 'Loading...';
+            document.getElementById('movies-container').innerHTML = '';
+
+            try {
+                // GET /movies/{friend.id}/liked — вподобані фільми друга
+                const resp = await fetch(`${BASE_URL}/movies/${friend.id}/liked`);
+                const movies = await resp.json();
+
+                document.getElementById('selected-friend-stats').textContent =
+                    `${movies.length} movie${movies.length !== 1 ? 's' : ''} liked`;
+
+                const container = document.getElementById('movies-container');
+
+                if (!movies.length) {
+                    container.innerHTML = '<p class="empty-msg">No liked movies yet.</p>';
+                    return;
+                }
+
+                container.innerHTML = movies.map(m => {
+                    const posterUrl = m.poster_path
+                        ? `https://image.tmdb.org/t/p/w500${m.poster_path}`
+                        : '';
+                    return `
+                    <div class="movie-card">
+                        ${posterUrl
+                            ? `<img src="${posterUrl}" class="movie-poster" alt="${m.movie_name}">`
+                            : `<div class="movie-poster-placeholder">${m.movie_name}</div>`
+                        }
+                        <div class="movie-info">
+                            <div style="font-weight:bold;">${m.movie_name}</div>
+                        </div>
+                    </div>`;
+                }).join('');
+
+            } catch (e) {
+                document.getElementById('movies-container').innerHTML =
+                    '<p style="color:red;">Failed to load movies.</p>';
+            }
+        }
+
+        init();
     </script>
 </body>
 </html>

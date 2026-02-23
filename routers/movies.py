@@ -1,51 +1,53 @@
-from typing import Annotated
+from typing import Annotated, Optional
 
-from fastapi import APIRouter, Query, Depends
-
-from typing import Optional
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from auth import CurrentUser
 from database import get_db
 from services.movie_service import MovieService
-
 from schemas import MoviePublic
-from auth import CurrentUser
-
 
 router = APIRouter()
 
-# Хелпер для отримання сервісу фільмів
-async def get_movie_service(db: Annotated[AsyncSession, Depends(get_db)]):
-    return MovieService(db)
+DB = Annotated[AsyncSession, Depends(get_db)]
 
+
+# GET /movies/
+# choose.html завантажує список фільмів з TMDB. Токен не потрібен.
+# Параметри опціональні: ?name=Matrix&year=1999&page=2
 @router.get("/")
 async def get_movies(
-    name: Optional[str] = Query(None),
-    year: Optional[int] = Query(None),
-    page: int = Query(1, ge=1, le=500),
-    movie_service: MovieService = Depends(get_movie_service)
+    name: Optional[str] = None,
+    year: Optional[int] = None,
+    page: int = 1,
+    db: DB = None,
 ):
-    return await movie_service.get_all_movies(name=name, year=year, page=page)
+    service = MovieService(db)
+    return await service.get_all_movies(name=name, year=year, page=page)
 
+
+# POST /movies/like-movie
+# choose.html — кнопка ❤️. Потрібен токен.
+# Тіло запиту: { "id": 603, "poster_path": "/abc.jpg", "movie_name": "The Matrix" }
 @router.post("/like-movie")
-async def like_movie(
-    movie_data: MoviePublic,
-    current_user: CurrentUser,
-    movie_service: MovieService = Depends(get_movie_service)
-):
-    return await movie_service.like_movie(movie_data=movie_data, current_user=current_user)
+async def like_movie(movie_data: MoviePublic, db: DB, current_user: CurrentUser):
+    service = MovieService(db)
+    return await service.like_movie(movie_data, current_user)
 
-@router.get("/{user_id}/liked", response_model=list[MoviePublic])
-async def get_liked_movies(
-    user_id: int,
-    movie_service: MovieService = Depends(get_movie_service)
-):
-    return await movie_service.get_user_liked_movies(user_id=user_id)
 
-@router.get("/common/{friend_id}", response_model=list[MoviePublic])
-async def get_common_movies(
-    friend_id: int,
-    current_user: CurrentUser,
-    movie_service: MovieService = Depends(get_movie_service)
-):
-    return await movie_service.get_common_movies(current_user=current_user, friend_id=friend_id)
+# GET /movies/common/{friend_id}
+# Спільні фільми з другом. Потрібен токен.
+# СТОЇТЬ ВИЩЕ /{user_id}/liked — інакше "common" трактується як user_id
+@router.get("/common/{friend_id}")
+async def get_common_movies(friend_id: int, db: DB, current_user: CurrentUser):
+    service = MovieService(db)
+    return await service.get_common_movies(current_user, friend_id)
+
+
+# GET /movies/{user_id}/liked
+# my_films.html і profile.html — вподобані фільми юзера. Токен не потрібен.
+@router.get("/{user_id}/liked")
+async def get_liked_movies(user_id: int, db: DB):
+    service = MovieService(db)
+    return await service.get_user_liked_movies(user_id)
