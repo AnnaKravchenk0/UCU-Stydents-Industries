@@ -36,6 +36,8 @@ class Movie(Base):
     __tablename__ = 'movies'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    poster_path = mapped_column(String, unique=False, nullable=False)
+    movie_name = mapped_column(String, unique=False, nullable=False)
     liked_by: Mapped[list[User]] = relationship(
         secondary=likes,
         back_populates='liked_movies'

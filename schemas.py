@@ -22,3 +22,8 @@ class UserPublic(BaseModel):
 
     id: int
     username: str
+
+class MoviePublic(BaseModel):
+    id: int
+    poster_path: str
+    movie_name: str
