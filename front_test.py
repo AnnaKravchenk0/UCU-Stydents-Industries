@@ -9,6 +9,12 @@ BASE_URL = "http://127.0.0.1:8000"
 if "token" not in st.session_state:
     st.session_state.token = None
 
+if "movies_list" not in st.session_state:
+    st.session_state.movies_list = []
+
+if "movie_index" not in st.session_state:
+    st.session_state.movie_index = 0
+
 
 # ---------------- REGISTRATION ----------------
 st.header("Registration")
@@ -164,127 +170,114 @@ else:
 
 
 
-# ---------------- MOVIES ----------------
-st.header("Get movies")
+# ---------------- MOVIES EXPLORER & LIKE ----------------
+st.header("🎬 Movie Explorer")
 
-name = st.text_input("Назва фільму (name)")
-year = st.number_input("Рік (year)", value=None, step=1)
-page = st.number_input("Сторінка (page)", min_value=1, value=1)
+col_search1, col_search2, col_search3 = st.columns([3, 1, 1])
+with col_search1:
+    name = st.text_input("Назва фільму", placeholder="Наприклад: Inception")
+with col_search2:
+    year = st.number_input("Рік", value=None, step=1)
+with col_search3:
+    page = st.number_input("Сторінка", min_value=1, value=1)
 
-if 'movie_index' not in st.session_state:
-    st.session_state.movie_index = 0
-if 'movies_list' not in st.session_state:
-    st.session_state.movies_list = []
-
-if st.button("Зробити запит"):
-    # Формуємо параметри (фільтруємо None)
+if st.button("🔍 Пошук", use_container_width=True):
     params = {"name": name, "year": year, "page": page}
     params = {k: v for k, v in params.items() if v}
-
     try:
-        # Запит до твого FastAPI (файл movies.py)
-        response = requests.get("http://127.0.0.1:8000/movies/", params=params)
-
+        response = requests.get(f"{BASE_URL}/movies/", params=params)
         if response.status_code == 200:
-            data = response.json()
-
-            # Зберігаємо результати з TMDBClient у стан
-            st.session_state.movies_list = data.get("results", [])
-            st.session_state.movie_index = 0 # Скидаємо на перший фільм
-        else:
-            st.error(f"Помилка сервера: {response.status_code}")
-            st.write(response.text)
-
+            st.session_state.movies_list = response.json().get("results", [])
+            st.session_state.movie_index = 0
+            st.rerun()
     except Exception as e:
-        st.error(f"Не вдалося підключитися до бекенду: {e}")
+        st.error(f"Помилка підключення: {e}")
 
 if st.session_state.movies_list:
-    movies = st.session_state.movies_list
-    idx = st.session_state.movie_index
+    movie = st.session_state.movies_list[st.session_state.movie_index]
 
-    # Виводимо дані поточного фільму
-    st.subheader(f"Фільм {idx + 1} з {len(movies)}")
-    st.json(movies[idx])
+    st.divider()
+    col_poster, col_info = st.columns([1, 2])
 
-    # Кнопки навігації
-    col1, col2 = st.columns(2)
+    with col_poster:
+        # TMDB повертає poster_url, але в базу ми збережемо poster_path (відносний шлях)
+        poster_url = movie.get("poster_url")
+        if poster_url:
+            st.image(poster_url, use_container_width=True)
+        else:
+            st.info("Постер відсутній")
 
-    with col1:
-        if st.button("⬅️ Попередній"):
-            if idx > 0:
-                st.session_state.movie_index -= 1
-                st.rerun()
+    with col_info:
+        st.title(movie.get("title", "Unknown"))
+        st.write(f"⭐ Рейтинг: {movie.get('vote_average')}")
+        st.write(f"🎭 Жанри: {', '.join(movie.get('genres_str', [])) if movie.get('genres_str') else 'N/A'}")
+        st.write(f"📝 {movie.get('overview', 'No description available.')}")
 
-    with col2:
-        if st.button("Наступний ➡️"):
-            if idx < len(movies) - 1:
-                st.session_state.movie_index += 1
-                st.rerun()
-            else:
-                st.warning("Це останній фільм у списку.")
-else:
-    st.info("Натисніть кнопку вище, щоб завантажити дані.")
+        if st.session_state.token:
+            # На бекенді твій MoviePublic очікує: id, poster_path, movie_name
+            if st.button("❤️ Like", use_container_width=True):
+                headers = {"Authorization": f"Bearer {st.session_state.token}"}
+                # Важливо: ми передаємо дані так, як їх очікує MoviePublic на бекенді
+                movie_payload = {
+                    "id": movie["id"],
+                    "poster_path": movie.get("poster_path") or "", # зберігаємо шлях
+                    "movie_name": movie.get("title") or "Unknown"
+                }
+                # Твій ендпоїнт: @router.get("/like-movie")
+                # УВАГА: У тебе в коді @router.get, але для передачі тіла (movie_data) краще @router.post.
+                # Якщо залишаєш GET, requests має слати json в get (деякі сервери це блокують).
+                res = requests.get(f"{BASE_URL}/movies/like-movie", json=movie_payload, headers=headers)
+                if res.status_code == 200:
+                    st.toast(res.json().get("message"))
+                else:
+                    st.error("Помилка при лайку")
 
-# ---------------- MOVIES ENDPOINTS TEST ----------------
+    # Навігація
+    n_col1, n_col2, n_col3 = st.columns([1,1,1])
+    with n_col1:
+        if st.button("⬅️ Назад") and st.session_state.movie_index > 0:
+            st.session_state.movie_index -= 1
+            st.rerun()
+    with n_col3:
+        if st.button("Вперед ➡️") and st.session_state.movie_index < len(st.session_state.movies_list) - 1:
+            st.session_state.movie_index += 1
+            st.rerun()
 
+# ---------------- LIKED MOVIES SECTION ----------------
 st.divider()
-st.header("🎬 Movies Endpoints Testing")
+st.header("📂 Community & Matches")
 
-if not st.session_state.token:
-    st.info("Login first to test movie endpoints.")
-else:
-    headers = {"Authorization": f"Bearer {st.session_state.token}"}
+tab1, tab2 = st.tabs(["My & Others Favorites", "🍿 Match with Friend"])
 
-    # -------- LIKE MOVIE --------
-    st.subheader("❤️ Like Movie")
+with tab1:
+    u_id = st.number_input("Чиї вподобання показати? (Введіть ID)", min_value=1, step=1)
+    if st.button("Показати фільми"):
+        r = requests.get(f"{BASE_URL}/movies/{u_id}/liked")
+        if r.status_code == 200:
+            liked_data = r.json()
+            if not liked_data:
+                st.info("Список порожній")
+            for m in liked_data:
+                with st.expander(f"🎬 {m['movie_name']}"):
+                    if m['poster_path']:
+                        st.image(f"https://image.tmdb.org/t/p/w200{m['poster_path']}")
+                    st.write(f"ID фільму в TMDB: {m['id']}")
+        else:
+            st.error("Користувача не знайдено")
 
-    movie_id = st.number_input("Movie ID", min_value=1, step=1, key="like_movie_id")
-    movie_name = st.text_input("Movie name", key="like_movie_name")
-    poster_path = st.text_input("Poster path", key="like_movie_poster")
-
-    if st.button("Like Movie"):
-        payload = {
-            "id": movie_id,
-            "movie_name": movie_name,
-            "poster_path": poster_path,
-        }
-
-        r = requests.get(
-            f"{BASE_URL}/movies/like-movie",
-            json=payload,
-            headers=headers,
-            timeout=5,
-        )
-
-        st.write(r.status_code)
-        st.json(r.json())
-
-    # -------- GET LIKED MOVIES --------
-    st.subheader("📂 Get Liked Movies")
-
-    liked_user_id = st.number_input("User ID", min_value=1, step=1, key="liked_user_id")
-
-    if st.button("Get liked movies"):
-        r = requests.get(
-            f"{BASE_URL}/movies/{liked_user_id}/liked",
-            headers=headers,
-            timeout=5,
-        )
-
-        st.write(r.status_code)
-        st.json(r.json())
-
-    # -------- COMMON MOVIES --------
-    st.subheader("👯 Common Movies")
-
-    friend_id = st.number_input("Friend ID", min_value=1, step=1, key="common_friend_id")
-
-    if st.button("Get common movies"):
-        r = requests.get(
-            f"{BASE_URL}/movies/common/{friend_id}",
-            headers=headers,
-            timeout=5,
-        )
-
-        st.write(r.status_code)
-        st.json(r.json())
+with tab2:
+    f_id = st.number_input("ID друга для пошуку спільних фільмів", min_value=1, step=1, key="match_id")
+    if st.button("Find Common Movies"):
+        if not st.session_state.token:
+            st.warning("Спочатку увійдіть в систему!")
+        else:
+            headers = {"Authorization": f"Bearer {st.session_state.token}"}
+            r = requests.get(f"{BASE_URL}/movies/common/{f_id}", headers=headers)
+            if r.status_code == 200:
+                common = r.json()
+                if common:
+                    st.success(f"У вас {len(common)} спільних фільмів!")
+                    for m in common:
+                        st.write(f"🌟 **{m['movie_name']}**")
+                else:
+                    st.info("Спільних фільмів поки немає.")
