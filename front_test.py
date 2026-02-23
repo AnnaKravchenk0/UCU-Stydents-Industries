@@ -217,20 +217,21 @@ if st.session_state.movies_list:
             # На бекенді твій MoviePublic очікує: id, poster_path, movie_name
             if st.button("❤️ Like", use_container_width=True):
                 headers = {"Authorization": f"Bearer {st.session_state.token}"}
-                # Важливо: ми передаємо дані так, як їх очікує MoviePublic на бекенді
                 movie_payload = {
                     "id": movie["id"],
-                    "poster_path": movie.get("poster_path") or "", # зберігаємо шлях
+                    "poster_path": movie.get("poster_path") or "",
                     "movie_name": movie.get("title") or "Unknown"
                 }
-                # Твій ендпоїнт: @router.get("/like-movie")
-                # УВАГА: У тебе в коді @router.get, але для передачі тіла (movie_data) краще @router.post.
-                # Якщо залишаєш GET, requests має слати json в get (деякі сервери це блокують).
-                res = requests.get(f"{BASE_URL}/movies/like-movie", json=movie_payload, headers=headers)
-                if res.status_code == 200:
-                    st.toast(res.json().get("message"))
+
+                # ЗМІНИ ЦЕЙ РЯДОК: з requests.get на requests.post
+                response = requests.post(f"{BASE_URL}/movies/like-movie", json=movie_payload, headers=headers)
+
+                if response.status_code == 200:
+                    st.toast(response.json().get("message"))
+                elif response.status_code == 401:
+                    st.error("Будь ласка, спочатку авторизуйтесь.")
                 else:
-                    st.error("Помилка при лайку")
+                    st.error(f"Помилка: {response.status_code}")
 
     # Навігація
     n_col1, n_col2, n_col3 = st.columns([1,1,1])

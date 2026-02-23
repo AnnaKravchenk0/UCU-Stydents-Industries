@@ -2,92 +2,48 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy import func, select, or_, and_
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-import models
-
-from auth import (
-    CurrentUser,
-    create_access_token,
-    hash_password,
-    verify_password,
-)
+from services.user_service import UserService, FriendshipService
+from auth import CurrentUser, auth_service
 
 from database import get_db
 from schemas import Token, UserCreate, UserPublic
 
-
-
 router = APIRouter()
+
+# service dependency
+async def get_user_service(db: Annotated[AsyncSession, Depends(get_db)]):
+    return UserService(db)
+
+async def get_friend_service(db: Annotated[AsyncSession, Depends(get_db)]):
+    return FriendshipService(db)
 
 
 
 # ---------------- registration ----------------
 
-@router.post(
-    "/registration",
-    response_model=UserPublic,
-    status_code=status.HTTP_201_CREATED,
-)
-async def create_user(user: UserCreate, db: Annotated[AsyncSession, Depends(get_db)]):
-    result = await db.execute(
-        select(models.User).where(models.User.username == user.username),
-    )
-
-    existing_user = result.scalars().first()
-    if existing_user:
-        raise HTTPException(
-            status_code = status.HTTP_400_BAD_REQUEST,
-            detail = "Username already exists"
-        )
-
-    new_user = models.User(
-        username = user.username,
-        password_hash = hash_password(user.password)
-    )
-
-    db.add(new_user)
-    await db.commit()
-    await db.refresh(new_user)
-    return new_user
+@router.post("/registration", response_model=UserPublic, status_code=status.HTTP_201_CREATED)
+async def create_user(user: UserCreate, service: UserService = Depends(get_user_service)):
+    return await service.register(user)
 
 
 
 # ---------------- login ----------------
 
 @router.post("/login", response_model=Token)
-async def login(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-    db: Annotated[AsyncSession, Depends(get_db)],
-):
-    result = await db.execute(
-        select(models.User).where(
-            func.lower(models.User.username) == form_data.username.lower(),
-        ),
-    )
-    user = result.scalars().first()
-
-    # Verify user exists and password is correct
-    if not user or not verify_password(form_data.password, user.password_hash):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    # Create access token with user id as subject
-    access_token = create_access_token(
-        data={"sub": str(user.id)},
-    )
-    return Token(access_token=access_token, token_type="bearer")
+async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], service: UserService = Depends(get_user_service)):
+    user = await service.authenticate(form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect email or password")
+    return Token(access_token=auth_service.create_access_token(data={"sub": str(user.id)}), token_type="bearer")
 
 
 
 # ---------------- get_current_user ----------------
 
-@router.get("/me", response_model=UserPublic)
+@router.get("/me", response_model=UserPublic, status_code=status.HTTP_200_OK)
 async def get_current_user(current_user: CurrentUser):
     return current_user
 
@@ -95,198 +51,54 @@ async def get_current_user(current_user: CurrentUser):
 
 # ---------------- get_user ----------------
 
-@router.get(
-    "/{user_id}",
-    response_model=UserPublic,
-    status_code=status.HTTP_200_OK,
-)
-async def get_user(user_id: str, db: Annotated[AsyncSession, Depends(get_db)]):
-    result = await db.execute(
-        select(models.User).where(models.User.id == user_id),
-    )
-
-    user = result.scalars().first()
-    if user:
-        return user
-
-    raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="user_id doesn't exists"
-        )
+@router.get("/{user_id}", response_model=UserPublic, status_code=status.HTTP_200_OK)
+async def get_user(user_id: int, service: UserService = Depends(get_user_service)):
+    return await service.get_by_id(user_id)
 
 
 
 # ---------------- delete_user ----------------
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_user(
-    user_id: int,
-    current_user: CurrentUser,
-    db: Annotated[AsyncSession, Depends(get_db)],
-):
-    if user_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not authorized to delete this user",
-        )
-
-    result = await db.execute(select(models.User).where(models.User.id == user_id))
-    user = result.scalars().first()
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found",
-        )
-
-    await db.delete(user)
-    await db.commit()
+async def delete_user(user_id: int, current_user: CurrentUser, service: UserService = Depends(get_user_service)):
+    await service.delete_user(user_id, current_user.id)
 
 
 
 # ---------------- send_friend_request ----------------
 
 @router.post("/friends/request/{friend_id}", status_code=status.HTTP_201_CREATED)
-async def send_friend_request(
-    friend_id: int,
-    current_user: CurrentUser,
-    db: Annotated[AsyncSession, Depends(get_db)]
-):
-    if current_user.id == friend_id:
-        raise HTTPException(status_code=400, detail="You cannot add yourself as a friend")
-
-    # Перевіряємо, чи існує вже будь-який зв'язок між цими користувачами
-    result = await db.execute(
-        select(models.Friendship).where(
-            or_(
-                and_(models.Friendship.user_id == current_user.id, models.Friendship.friend_id == friend_id),
-                and_(models.Friendship.user_id == friend_id, models.Friendship.friend_id == current_user.id)
-            )
-        )
-    )
-    existing = result.scalars().first()
-
-    if existing:
-        status_msg = "already friends" if existing.is_accepted else "request already pending"
-        raise HTTPException(status_code=400, detail=f"Relationship exists: {status_msg}")
-
-    # Створюємо новий запит (is_accepted за замовчуванням False)
-    new_request = models.Friendship(
-        user_id=current_user.id,
-        friend_id=friend_id
-    )
-    db.add(new_request)
-    await db.commit()
-    return {"message": "Friend request sent"}
+async def send_friend_request(friend_id: int, current_user: CurrentUser, service: FriendshipService = Depends(get_friend_service)):
+    return await service.send_request(current_user.id, friend_id)
 
 
 
 # ---------------- accept_friend_request ----------------
 
 @router.post("/friends/accept/{sender_id}")
-async def accept_friend_request(
-    sender_id: int,
-    current_user: CurrentUser,
-    db: Annotated[AsyncSession, Depends(get_db)]
-):
-    # Шукаємо запит, де ми є отримувачем (friend_id)
-    result = await db.execute(
-        select(models.Friendship).where(
-            and_(
-                models.Friendship.user_id == sender_id,
-                models.Friendship.friend_id == current_user.id,
-                models.Friendship.is_accepted == False
-            )
-        )
-    )
-    request = result.scalars().first()
-
-    if not request:
-        raise HTTPException(status_code=404, detail="Pending request not found")
-
-    request.is_accepted = True
-    await db.commit()
-    return {"message": "Friend request accepted"}
+async def accept_friend_request(sender_id: int, current_user: CurrentUser, service: FriendshipService = Depends(get_friend_service)):
+    return await service.accept_request(current_user.id, sender_id)
 
 
 
 # ---------------- get_my_friends ----------------
 
 @router.get("/friends/my", response_model=list[UserPublic])
-async def get_my_friends(
-    current_user: CurrentUser,
-    db: Annotated[AsyncSession, Depends(get_db)]
-):
-    result = await db.execute(
-        select(models.Friendship).where(
-            and_(
-                models.Friendship.is_accepted == True,
-                or_(
-                    models.Friendship.user_id == current_user.id,
-                    models.Friendship.friend_id == current_user.id
-                )
-            )
-        )
-    )
-    friendships = result.scalars().all()
-
-    friend_ids = [
-        friendship.friend_id if friendship.user_id == current_user.id else friendship.user_id for friendship in friendships
-    ]
-
-    if not friend_ids:
-        return []
-
-    users_result = await db.execute(
-        select(models.User).where(models.User.id.in_(friend_ids))
-    )
-    return users_result.scalars().all()
+async def get_my_friends(current_user: CurrentUser, service: FriendshipService = Depends(get_friend_service)):
+    return await service.get_friends(current_user.id)
 
 
 
 # ---------------- get_incoming_requests ----------------
 
 @router.get("/friends/requests/incoming", response_model=list[UserPublic])
-async def get_incoming_requests(
-    current_user: CurrentUser,
-    db: Annotated[AsyncSession, Depends(get_db)]
-):
-    # Вибираємо користувачів, які надіслали нам запит
-    result = await db.execute(
-        select(models.User)
-        .join(models.Friendship, models.User.id == models.Friendship.user_id)
-        .where(
-            and_(
-                models.Friendship.friend_id == current_user.id,
-                models.Friendship.is_accepted == False
-            )
-        )
-    )
-    return result.scalars().all()
+async def get_incoming_requests(current_user: CurrentUser, service: FriendshipService = Depends(get_friend_service)):
+    return await service.get_incoming(current_user.id)
 
 
 
 # ---------------- remove_friendship ----------------
 
-# Відхилити запит або видалити з друзів
 @router.delete("/friends/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def remove_friendship(
-    user_id: int,
-    current_user: CurrentUser,
-    db: Annotated[AsyncSession, Depends(get_db)]
-):
-    result = await db.execute(
-        select(models.Friendship).where(
-            or_(
-                and_(models.Friendship.user_id == current_user.id, models.Friendship.friend_id == user_id),
-                and_(models.Friendship.user_id == user_id, models.Friendship.friend_id == current_user.id)
-            )
-        )
-    )
-    friendship = result.scalars().first()
-
-    if not friendship:
-        raise HTTPException(status_code=404, detail="Friendship or request not found")
-
-    await db.delete(friendship)
-    await db.commit()
-    return None
+async def remove_friendship(user_id: int, current_user: CurrentUser, service: FriendshipService = Depends(get_friend_service)):
+    await service.remove_friendship(current_user.id, user_id)
