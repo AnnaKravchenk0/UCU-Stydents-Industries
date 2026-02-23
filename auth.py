@@ -13,55 +13,61 @@ import models
 from config import settings
 from database import get_db
 
-password_hash = PasswordHash.recommended()
+class AuthService:
+    def __init__(self):
+        self.password_hash = PasswordHash.recommended()
+        self.oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/users/token")
+        self.secret_key = settings.secret_key.get_secret_value()
+        self.algorithm = settings.algorithm
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/users/token")
+    def hash_password(self, password: str) -> str:
+        """Хешування пароля."""
+        return self.password_hash.hash(password)
 
+    def verify_password(self, plain_password: str, hashed_password: str) -> bool:
+        """Перевірка пароля."""
+        return self.password_hash.verify(plain_password, hashed_password)
 
-def hash_password(password: str) -> str:
-    return password_hash.hash(password)
-
-
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return password_hash.verify(plain_password, hashed_password)
-
-def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
-    """Create a JWT access token."""
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.now(UTC) + expires_delta
-    else:
-        expire = datetime.now(UTC) + timedelta(
-            minutes=settings.access_token_expire_minutes,
+    def create_access_token(self, data: dict, expires_delta: timedelta = None) -> str:
+        """Створення JWT токена."""
+        to_encode = data.copy()
+        if expires_delta:
+            expire = datetime.now(UTC) + expires_delta
+        else:
+            expire = datetime.now(UTC) + timedelta(
+                minutes=settings.access_token_expire_minutes,
+            )
+        to_encode.update({"exp": expire})
+        encoded_jwt = jwt.encode(
+            to_encode,
+            self.secret_key,
+            algorithm=self.algorithm,
         )
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(
-        to_encode,
-        settings.secret_key.get_secret_value(),
-        algorithm=settings.algorithm,
-    )
-    return encoded_jwt
+        return encoded_jwt
 
+    def verify_access_token(self, token: str) -> str | None:
+        """Перевірка JWT токена та повернення subject (user id)."""
+        try:
+            payload = jwt.decode(
+                token,
+                self.secret_key,
+                algorithms=[self.algorithm],
+                options={"require": ["exp", "sub"]},
+            )
+            return payload.get("sub")
+        except jwt.InvalidTokenError:
+            return None
 
-def verify_access_token(token: str) -> str | None:
-    """Verify a JWT access token and return the subject (user id) if valid."""
-    try:
-        payload = jwt.decode(
-            token,
-            settings.secret_key.get_secret_value(),
-            algorithms=[settings.algorithm],
-            options={"require": ["exp", "sub"]},
-        )
-    except jwt.InvalidTokenError:
-        return None
-    else:
-        return payload.get("sub")
+# Створюємо єдиний екземпляр сервісу для всього додатку
+auth_service = AuthService()
 
+# Функція-залежність для отримання поточного користувача
 async def get_current_user(
-    token: Annotated[str, Depends(oauth2_scheme)],
+    token: Annotated[str, Depends(auth_service.oauth2_scheme)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> models.User:
-    user_id = verify_access_token(token)
+    user_id = auth_service.verify_access_token(token)
+
     if user_id is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -82,6 +88,7 @@ async def get_current_user(
         select(models.User).where(models.User.id == user_id_int),
     )
     user = result.scalars().first()
+
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -90,5 +97,5 @@ async def get_current_user(
         )
     return user
 
-
+# Тип для зручного використання в роутах
 CurrentUser = Annotated[models.User, Depends(get_current_user)]
