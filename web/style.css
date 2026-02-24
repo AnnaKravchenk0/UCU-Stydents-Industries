@@ -148,6 +148,7 @@ header {
     margin-bottom: 30px;
     font-size: 2rem;
     color: white;
+    /* text-align: center; */
 }
 
 .center {
@@ -168,6 +169,8 @@ header {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 20px;
+    justify-content: center;
+    max-width: 100%
 }
 
 .movie-card {
