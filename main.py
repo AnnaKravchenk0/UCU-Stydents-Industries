@@ -9,6 +9,8 @@ from routers import users, movies
 
 # Command to start backend
 # uvicorn main:app --reload
+# python3 -m  uvicorn main:app --reload
+
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
