@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MovieMatch - Friend's Library</title>
+    <title>MovieMatch - Friends</title>
     <link rel="stylesheet" href="style.css">
     <style>
         .profile-container {
@@ -15,31 +15,128 @@
             padding: 0 20px;
         }
 
+        /* ── Ліва панель ── */
         .friends-sidebar {
-            background: rgba(36, 30, 56, 0.8);
-            backdrop-filter: blur(20px);
-            padding: 30px;
-            border-radius: 40px;
-            border: 1px solid rgba(184, 59, 136, 0.3);
-            height: fit-content;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
         }
 
+        .sidebar-block {
+            background: rgba(36, 30, 56, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 25px;
+            border-radius: 30px;
+            border: 1px solid rgba(184, 59, 136, 0.3);
+        }
+
+        .sidebar-block-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Лічильник вхідних запитів */
+        .badge {
+            background: var(--accent-pink);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 20px;
+            min-width: 22px;
+            text-align: center;
+        }
+
+        /* ── Елемент друга ── */
         .friend-item {
             display: flex;
             align-items: center;
-            gap: 15px;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 20px;
+            gap: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 18px;
             cursor: pointer;
-            transition: 0.3s;
+            transition: 0.25s;
             border: 1px solid transparent;
         }
+        .friend-item:last-child { margin-bottom: 0; }
         .friend-item:hover  { background: rgba(255,255,255,0.05); }
         .friend-item.active { background: rgba(184,59,136,0.2); border-color: var(--accent-pink); }
 
-        .avatar-circle { width:45px; height:45px; background:var(--accent-pink); border-radius:50%; flex-shrink:0; }
+        .avatar-circle {
+            width: 42px;
+            height: 42px;
+            background: var(--accent-pink);
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+            color: white;
+        }
 
+        .friend-name  { font-weight: 600; font-size: 0.95rem; }
+        .friend-sub   { font-size: 0.78rem; color: var(--text-sec); margin-top: 2px; }
+
+        /* ── Кнопки прийняти / відхилити ── */
+        .request-actions {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+
+        .btn-accept {
+            background: #2ecc71;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.82rem;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+        .btn-accept:hover { background: #27ae60; transform: scale(1.05); }
+
+        .btn-reject {
+            background: transparent;
+            color: #e74c3c;
+            border: 1px solid #e74c3c;
+            padding: 6px 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.82rem;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+        .btn-reject:hover { background: rgba(231,76,60,0.15); transform: scale(1.05); }
+
+        /* Кнопка видалити друга */
+        .btn-unfriend {
+            background: transparent;
+            color: var(--text-sec);
+            border: 1px solid #444;
+            padding: 4px 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: 0.2s;
+            margin-left: auto;
+            flex-shrink: 0;
+            opacity: 0;
+        }
+        .friend-item:hover .btn-unfriend { opacity: 1; }
+        .btn-unfriend:hover { color: #e74c3c; border-color: #e74c3c; }
+
+        /* ── Права панель ── */
         .movies-feed {
             background: rgba(36, 30, 56, 0.5);
             padding: 40px;
@@ -65,12 +162,32 @@
         .movie-poster-placeholder {
             width:100%; height:260px; background:#2a2440;
             display:flex; align-items:center; justify-content:center;
-            color:#aaa; font-size:0.9rem; padding:10px; text-align:center;
+            color:#aaa; font-size:0.85rem; padding:10px; text-align:center;
         }
-        .movie-info { padding:15px; }
+        .movie-info { padding:12px 15px; }
 
-        .empty-msg { color:var(--text-sec); text-align:center; padding:40px 0; }
+        .empty-msg { color:var(--text-sec); text-align:center; padding:30px 0; line-height:1.8; }
         .empty-msg a { color:var(--accent-pink); text-decoration:none; }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 35px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #2ecc71;
+            color: white;
+            padding: 11px 28px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+            pointer-events: none;
+        }
+        .toast.show  { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.error { background: #e74c3c; }
     </style>
 </head>
 <body>
@@ -83,20 +200,43 @@
                 <li><a href="index.html#contacts">Contacts</a></li>
                 <li><a href="search_friends.html">Search Friends</a></li>
                 <li><a href="my_films.html">My Collection</a></li>
-                <li><a href="profile.html" class="active" style="color:var(--accent-pink);">Friends</a></li>
+                <li><a href="profile.html" style="color:var(--accent-pink);">Friends</a></li>
             </ul>
         </nav>
     </header>
 
     <div class="profile-container">
 
+        <!-- ── Ліва панель ── -->
         <aside class="friends-sidebar">
-            <h2 style="margin-bottom:20px;">My Friends</h2>
-            <div id="friends-list">
-                <p style="color:var(--text-sec);">Loading...</p>
+
+            <!-- Вхідні запити -->
+            <div class="sidebar-block" id="requests-block" style="display:none;">
+                <div class="sidebar-block-title">
+                    Incoming Requests
+                    <span class="badge" id="requests-badge">0</span>
+                </div>
+                <div id="requests-list"></div>
             </div>
+
+            <!-- Список друзів -->
+            <div class="sidebar-block">
+                <div class="sidebar-block-title">My Friends</div>
+                <div id="friends-list">
+                    <p style="color:var(--text-sec);">Loading...</p>
+                </div>
+                <a href="search_friends.html" style="
+                    display:block; margin-top:15px; text-align:center;
+                    padding:10px; border:2px dashed rgba(184,59,136,0.5);
+                    border-radius:15px; color:var(--accent-pink);
+                    text-decoration:none; font-size:0.9rem; transition:0.2s;">
+                    + Find Friends
+                </a>
+            </div>
+
         </aside>
 
+        <!-- ── Права панель ── -->
         <main class="movies-feed">
             <div class="feed-header">
                 <h1 id="selected-friend-name">Select a friend to see their movies</h1>
@@ -107,29 +247,40 @@
 
     </div>
 
+    <div class="toast" id="toast"></div>
+
     <script>
         const BASE_URL = 'http://127.0.0.1:8000';
+        const token    = localStorage.getItem('token');
 
+        // ─────────────────────────────────────────
+        // Старт — паралельно вантажимо друзів і запити
+        // ─────────────────────────────────────────
         async function init() {
-            const token = localStorage.getItem('token');
             if (!token) {
                 window.location.href = 'login.html';
                 return;
             }
 
             try {
-                // GET /users/friends/my — список моїх друзів
-                const resp = await fetch(`${BASE_URL}/users/friends/my`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                // Запускаємо обидва запити одночасно
+                const [friendsResp, requestsResp] = await Promise.all([
+                    fetch(`${BASE_URL}/users/friends/my`,
+                        { headers: { 'Authorization': `Bearer ${token}` } }),
+                    fetch(`${BASE_URL}/users/friends/requests/incoming`,
+                        { headers: { 'Authorization': `Bearer ${token}` } })
+                ]);
 
-                if (resp.status === 401) {
+                if (friendsResp.status === 401) {
                     localStorage.removeItem('token');
                     window.location.href = 'login.html';
                     return;
                 }
 
-                const friends = await resp.json();
+                const friends  = await friendsResp.json();
+                const requests = await requestsResp.json();
+
+                renderRequests(requests);
                 renderFriends(friends);
 
             } catch (e) {
@@ -137,6 +288,115 @@
             }
         }
 
+        // ─────────────────────────────────────────
+        // Вхідні запити дружби
+        // GET /users/friends/requests/incoming
+        // ─────────────────────────────────────────
+        function renderRequests(requests) {
+            const block = document.getElementById('requests-block');
+            const list  = document.getElementById('requests-list');
+            const badge = document.getElementById('requests-badge');
+
+            // Якщо запитів немає — ховаємо блок повністю
+            if (!requests.length) {
+                block.style.display = 'none';
+                return;
+            }
+
+            block.style.display = 'block';
+            badge.textContent   = requests.length;
+
+            list.innerHTML = '';
+            requests.forEach(user => {
+                const div = document.createElement('div');
+                div.className = 'friend-item';
+                div.id = `req-${user.id}`;
+                div.innerHTML = `
+                    <div class="avatar-circle">${user.username.charAt(0).toUpperCase()}</div>
+                    <div>
+                        <div class="friend-name">${user.username}</div>
+                        <div class="friend-sub">wants to be friends</div>
+                    </div>
+                    <div class="request-actions">
+                        <button class="btn-accept" onclick="acceptRequest(${user.id}, '${user.username}')">
+                            ✓ Accept
+                        </button>
+                        <button class="btn-reject" onclick="rejectRequest(${user.id})">
+                            ✗
+                        </button>
+                    </div>`;
+                list.appendChild(div);
+            });
+        }
+
+        // ─────────────────────────────────────────
+        // Прийняти запит
+        // POST /users/friends/accept/{sender_id}
+        // ─────────────────────────────────────────
+        async function acceptRequest(senderId, username) {
+            try {
+                const resp = await fetch(`${BASE_URL}/users/friends/accept/${senderId}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (resp.ok) {
+                    // Видаляємо картку запиту з UI
+                    removeRequestCard(senderId);
+                    showToast(`✓ ${username} is now your friend!`);
+
+                    // Додаємо нового друга в список одразу без перезавантаження
+                    addFriendToList({ id: senderId, username });
+                } else {
+                    const data = await resp.json();
+                    showToast(data.detail || 'Error', true);
+                }
+            } catch (e) {
+                showToast('Server error', true);
+            }
+        }
+
+        // ─────────────────────────────────────────
+        // Відхилити запит
+        // DELETE /users/friends/{user_id}
+        // ─────────────────────────────────────────
+        async function rejectRequest(senderId) {
+            try {
+                const resp = await fetch(`${BASE_URL}/users/friends/${senderId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (resp.ok || resp.status === 204) {
+                    removeRequestCard(senderId);
+                    showToast('Request rejected');
+                } else {
+                    const data = await resp.json();
+                    showToast(data.detail || 'Error', true);
+                }
+            } catch (e) {
+                showToast('Server error', true);
+            }
+        }
+
+        // Видаляємо картку запиту і ховаємо блок якщо запитів не залишилось
+        function removeRequestCard(senderId) {
+            const card  = document.getElementById(`req-${senderId}`);
+            if (card) card.remove();
+
+            const remaining = document.querySelectorAll('#requests-list .friend-item').length;
+            const badge     = document.getElementById('requests-badge');
+            badge.textContent = remaining;
+
+            if (!remaining) {
+                document.getElementById('requests-block').style.display = 'none';
+            }
+        }
+
+        // ─────────────────────────────────────────
+        // Список друзів
+        // GET /users/friends/my
+        // ─────────────────────────────────────────
         function renderFriends(friends) {
             const list = document.getElementById('friends-list');
 
@@ -150,32 +410,97 @@
             }
 
             list.innerHTML = '';
-            friends.forEach(friend => {
-                const div = document.createElement('div');
-                div.className = 'friend-item';
-                div.innerHTML = `
-                    <div class="avatar-circle"></div>
-                    <div>
-                        <div style="font-weight:bold;">${friend.username}</div>
-                        <div style="font-size:0.8rem; color:var(--text-sec);">ID: ${friend.id}</div>
-                    </div>`;
-                div.onclick = () => selectFriend(friend, div);
-                list.appendChild(div);
-            });
+            friends.forEach(friend => addFriendToList(friend));
         }
 
+        // Додає одного друга в список (використовується і при рендері і при прийнятті запиту)
+        function addFriendToList(friend) {
+            const list = document.getElementById('friends-list');
+
+            // Прибираємо "No friends yet" якщо він є
+            const emptyMsg = list.querySelector('.empty-msg');
+            if (emptyMsg) emptyMsg.remove();
+
+            const div = document.createElement('div');
+            div.className = 'friend-item';
+            div.id = `friend-${friend.id}`;
+            div.innerHTML = `
+                <div class="avatar-circle">${friend.username.charAt(0).toUpperCase()}</div>
+                <div>
+                    <div class="friend-name">${friend.username}</div>
+                    <div class="friend-sub">click to see movies</div>
+                </div>
+                <button class="btn-unfriend" onclick="unfriend(event, ${friend.id}, '${friend.username}')">
+                    Remove
+                </button>`;
+            div.onclick = (e) => {
+                // Не спрацьовує якщо клікнули на кнопку Remove
+                if (e.target.classList.contains('btn-unfriend')) return;
+                selectFriend(friend, div);
+            };
+            list.appendChild(div);
+        }
+
+        // ─────────────────────────────────────────
+        // Видалити друга
+        // DELETE /users/friends/{user_id}
+        // ─────────────────────────────────────────
+        async function unfriend(event, friendId, username) {
+            event.stopPropagation();
+
+            if (!confirm(`Remove ${username} from friends?`)) return;
+
+            try {
+                const resp = await fetch(`${BASE_URL}/users/friends/${friendId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (resp.ok || resp.status === 204) {
+                    const card = document.getElementById(`friend-${friendId}`);
+                    if (card) card.remove();
+                    showToast(`${username} removed from friends`);
+
+                    // Якщо був відкритий його профіль — очищаємо
+                    const title = document.getElementById('selected-friend-name');
+                    if (title.textContent.includes(username)) {
+                        title.textContent = 'Select a friend to see their movies';
+                        document.getElementById('selected-friend-stats').textContent = '';
+                        document.getElementById('movies-container').innerHTML = '';
+                    }
+
+                    // Якщо список порожній — показуємо повідомлення
+                    const remaining = document.querySelectorAll('#friends-list .friend-item').length;
+                    if (!remaining) {
+                        document.getElementById('friends-list').innerHTML = `
+                            <div class="empty-msg">
+                                No friends yet.<br>
+                                <a href="search_friends.html">Find some!</a>
+                            </div>`;
+                    }
+                } else {
+                    const data = await resp.json();
+                    showToast(data.detail || 'Error', true);
+                }
+            } catch (e) {
+                showToast('Server error', true);
+            }
+        }
+
+        // ─────────────────────────────────────────
+        // Фільми вибраного друга
+        // GET /movies/{friend.id}/liked
+        // ─────────────────────────────────────────
         async function selectFriend(friend, element) {
-            // Підсвічуємо вибраного друга
             document.querySelectorAll('.friend-item').forEach(i => i.classList.remove('active'));
             element.classList.add('active');
 
-            document.getElementById('selected-friend-name').textContent = `${friend.username}'s Favorites`;
-            document.getElementById('selected-friend-stats').textContent  = 'Loading...';
+            document.getElementById('selected-friend-name').textContent  = `${friend.username}'s Favorites`;
+            document.getElementById('selected-friend-stats').textContent = 'Loading...';
             document.getElementById('movies-container').innerHTML = '';
 
             try {
-                // GET /movies/{friend.id}/liked — вподобані фільми друга
-                const resp = await fetch(`${BASE_URL}/movies/${friend.id}/liked`);
+                const resp   = await fetch(`${BASE_URL}/movies/${friend.id}/liked`);
                 const movies = await resp.json();
 
                 document.getElementById('selected-friend-stats').textContent =
@@ -199,15 +524,25 @@
                             : `<div class="movie-poster-placeholder">${m.movie_name}</div>`
                         }
                         <div class="movie-info">
-                            <div style="font-weight:bold;">${m.movie_name}</div>
+                            <div style="font-weight:600;">${m.movie_name}</div>
                         </div>
                     </div>`;
                 }).join('');
 
             } catch (e) {
                 document.getElementById('movies-container').innerHTML =
-                    '<p style="color:red;">Failed to load movies.</p>';
+                    '<p style="color:#e74c3c;">Failed to load movies.</p>';
             }
+        }
+
+        // ─────────────────────────────────────────
+        // Toast
+        // ─────────────────────────────────────────
+        function showToast(msg, isError = false) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.className   = 'toast show' + (isError ? ' error' : '');
+            setTimeout(() => { toast.className = 'toast'; }, 2500);
         }
 
         init();

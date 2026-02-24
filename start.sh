@@ -4,11 +4,7 @@
 #  MovieMatch — start.sh
 #  Перевіряє залежності, запускає бекенд,
 #  відкриває index.html у браузері
-
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #  Використання: ./start.sh
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 # ──────────────────────────────────────────────
 
 GREEN='\033[0;32m'
@@ -88,6 +84,7 @@ declare -A PACKAGES=(
     ["pydantic_settings"]="pydantic_settings==2.12.0"
     ["multipart"]="python-multipart==0.0.9"
     ["requests"]="requests==2.32.5"
+    ["greenlet"]="greenlet"
 )
 
 echo ""
