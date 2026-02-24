@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
@@ -276,9 +276,12 @@
     <script>
         const BASE_URL = 'http://127.0.0.1:8000';
 
-        let movies   = [];
-        let index    = 0;
-        let isSwiping = false;  // блокуємо подвійний клік
+        let movies      = [];
+        let index       = 0;
+        let isSwiping   = false;  // блокуємо подвійний клік
+        let currentPage = 1;      // поточна сторінка TMDB
+        let totalPages  = 1;      // всього сторінок (з відповіді TMDB)
+        let isLoading   = false;  // блокуємо подвійне підвантаження
 
         // Показуємо ім'я якщо залогінений
         const token    = localStorage.getItem('token');
@@ -294,22 +297,48 @@
         // 1. Завантаження фільмів з бека
         // GET /movies/ → { page, results: [...], total_pages }
         // ─────────────────────────────────────────────────────
-        async function fetchMovies() {
+        // Перемішуємо масив випадково (Fisher-Yates shuffle)
+        function shuffle(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // Підвантажуємо нову сторінку фільмів і додаємо до існуючих
+        async function fetchMovies(page = 1) {
+            if (isLoading) return;
+            isLoading = true;
+
             try {
-                const res  = await fetch(`${BASE_URL}/movies/`);
+                // Вибираємо випадкову сторінку щоб фільми були різними
+                const randomPage = page === 1
+                    ? Math.floor(Math.random() * 50) + 1  // перший раз — рандомна стор.
+                    : page;
+
+                const res  = await fetch(`${BASE_URL}/movies/?page=${randomPage}`);
                 const data = await res.json();
 
-                // TMDB завжди загортає список у поле "results"
-                movies = data.results || [];
+                totalPages = data.total_pages || 1;
 
-                if (!movies.length) {
+                // Перемішуємо щоб порядок був випадковим
+                const newMovies = shuffle(data.results || []);
+
+                if (!newMovies.length) {
                     document.getElementById('movie-desc').textContent = 'No movies found.';
+                    isLoading = false;
                     return;
                 }
 
-                renderMovie();
+                movies = [...movies, ...newMovies];
+                isLoading = false;
+
+                // Показуємо перший фільм тільки при першому завантаженні
+                if (page === 1) renderMovie();
 
             } catch (e) {
+                isLoading = false;
                 document.getElementById('movie-desc').textContent =
                     'Could not connect to server.';
             }
@@ -321,34 +350,31 @@
         function renderMovie() {
             const card = document.getElementById('main-card');
 
-            // Всі фільми переглянуто
+            // Підвантажуємо наступну сторінку коли залишилось 3 фільми
+            if (index >= movies.length - 3 && !isLoading) {
+                currentPage = Math.floor(Math.random() * 50) + 1;
+                fetchMovies(currentPage);
+            }
+
+            // Якщо фільми ще не підвантажились — показуємо лоадер
             if (index >= movies.length) {
-                card.classList.add('finished');
-                card.innerHTML = `
-                    <div style="animation:fadeInScale 0.5s ease-out;">
-                        <div style="font-size:5rem; margin-bottom:20px;">🎬</div>
-                        <h1 style="color:white; font-size:3rem; margin-bottom:15px;">That's all!</h1>
-                        <p style="color:#a0a0b0; font-size:1.1rem; margin-bottom:40px; max-width:450px; margin-left:auto; margin-right:auto;">
-                            You've seen all available movies. Come back later!
-                        </p>
-                        <a href="my_films.html" style="text-decoration:none; padding:15px 40px;
-                            background:var(--accent-pink); color:white; border-radius:30px;
-                            font-weight:bold; margin-right:15px;">
-                            My Collection
-                        </a>
-                        <a href="index.html" style="text-decoration:none; padding:15px 40px;
-                            background:#4a4a6a; color:white; border-radius:30px; font-weight:bold;">
-                            Home
-                        </a>
-                    </div>`;
+                document.getElementById('movie-title').textContent = 'Loading...';
+                document.getElementById('movie-desc').textContent  = 'Fetching new movies...';
+                document.getElementById('movie-img').style.display = 'none';
+                document.getElementById('movie-genres').innerHTML  = '';
+                document.getElementById('movie-rating').textContent = '';
+                document.getElementById('movie-date').textContent   = '';
+                document.getElementById('counter').textContent      = '';
+                // Перевіряємо кожні 500мс поки не з'являться нові фільми
+                setTimeout(() => renderMovie(), 500);
                 return;
             }
 
             const m = movies[index];
 
-            // Лічильник "3 / 20"
+            // Лічильник — скільки переглянуто
             document.getElementById('counter').textContent =
-                `${index + 1} / ${movies.length}`;
+                `Viewed: ${index + 1}`;
 
             // Назва фільму
             document.getElementById('movie-title').textContent =
@@ -402,9 +428,10 @@
             // Показуємо підказку LIKE або NOPE
             card.classList.add(type === 'like' ? 'show-like' : 'show-dislike');
 
-            // Якщо лайк — зберігаємо в базу даних
+            // Якщо лайк — зберігаємо в базу даних у фоні (без await)
+            // Не блокуємо анімацію — запит іде паралельно
             if (type === 'like') {
-                await saveLike(movies[index]);
+                saveLike(movies[index]);
             }
 
             // Анімація вильоту
@@ -446,9 +473,13 @@
                         'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({
-                        id:          movie.id,
-                        poster_path: movie.poster_path || '',
-                        movie_name:  movie.title || movie.original_title || 'Unknown'
+                        id:           movie.id,
+                        movie_name:   movie.title || movie.original_title || 'Unknown',
+                        poster_path:  movie.poster_path  || null,
+                        poster_url:   movie.poster_url   || null,
+                        overview:     movie.overview     || null,
+                        release_date: movie.release_date || null,
+                        vote_average: movie.vote_average || null
                     })
                 });
 

@@ -96,7 +96,7 @@
     <section class="hero">
         <div class="hero-content">
             <h1>Select Movie</h1>
-            <a href="choose.html" class="btn-choose">Choose</a>
+            <a href="#" class="btn-choose" onclick="goToChoose()">Choose</a>
         </div>
     </section>
 
@@ -105,7 +105,7 @@
         <!-- Popular Movies -->
         <section id="popular">
             <h2 class="section-title">Popular Movies</h2>
-            <div class="movie-grid" id="movie-grid">
+            <div class="movie-grid" id="movie-grid" style="grid-template-columns: repeat(5, 1fr);">
                 <!-- Скелетон-заглушки поки вантажиться -->
             </div>
         </section>
@@ -129,6 +129,18 @@
 
     <script>
         const BASE_URL = 'http://127.0.0.1:8000';
+
+        // ─────────────────────────────────────────────────────
+        // 0. Кнопка Choose — перевіряємо токен
+        // ─────────────────────────────────────────────────────
+        function goToChoose() {
+            const token = localStorage.getItem('token');
+            if (token) {
+                window.location.href = 'choose.html';
+            } else {
+                window.location.href = 'login.html';
+            }
+        }
 
         // ─────────────────────────────────────────────────────
         // 1. Навігація — перевіряємо токен
@@ -192,7 +204,7 @@
             try {
                 const res  = await fetch(`${BASE_URL}/movies/`);
                 const data = await res.json();
-                const movies = (data.results || []).slice(0, 12); // беремо перші 12
+                const movies = (data.results || []).slice(0, 20); // беремо перші 20
                 renderMovies(movies);
             } catch (e) {
                 // Сервер недоступний — залишаємо скелетони і показуємо повідомлення

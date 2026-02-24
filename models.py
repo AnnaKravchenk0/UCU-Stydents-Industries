@@ -1,16 +1,9 @@
 from __future__ import annotations
 
-from sqlalchemy import ForeignKey, Integer, String, Table, Column, Boolean
+from sqlalchemy import ForeignKey, Integer, String, Float, Table, Column, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database import Base
-
-# user_friends = Table(
-#     'user_friends',
-#     Base.metadata,
-#     Column('user_id', Integer, ForeignKey('users.id'), primary_key=True),
-#     Column('friend_id', Integer, ForeignKey('users.id'), primary_key=True)
-# )
 
 likes = Table(
     'likes',
@@ -24,7 +17,6 @@ class User(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     username: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
-    # nickname: Mapped[str] = mapped_column(String(50), unique=False, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(200), nullable=False)
 
     liked_movies: Mapped[list[Movie]] = relationship(
@@ -36,8 +28,17 @@ class Movie(Base):
     __tablename__ = 'movies'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    poster_path = mapped_column(String, unique=False, nullable=False)
-    movie_name = mapped_column(String, unique=False, nullable=False)
+
+    # Базові поля (були раніше)
+    movie_name = mapped_column(String, nullable=False)
+    poster_path = mapped_column(String, nullable=True)   # відносний шлях /abc.jpg
+
+    # Нові поля — всі nullable щоб не зламати існуючі записи в БД
+    poster_url   = mapped_column(String,  nullable=True)  # повний URL на зображення
+    overview     = mapped_column(String,  nullable=True)  # опис фільму
+    release_date = mapped_column(String,  nullable=True)  # дата виходу "2024-11-26"
+    vote_average = mapped_column(Float,   nullable=True)  # рейтинг 0.0–10.0
+
     liked_by: Mapped[list[User]] = relationship(
         secondary=likes,
         back_populates='liked_movies'
