@@ -1,8 +1,9 @@
-import os
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
-DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite+aiosqlite:///./blog.db')
+from config import settings
+
+DATABASE_URL = settings.database_url.get_secret_value() or 'sqlite+aiosqlite:///./blog.db'
 
 connect_args = {"check_same_thread": False} if "sqlite" in DATABASE_URL else {}
 
