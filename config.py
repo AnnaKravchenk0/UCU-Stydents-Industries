@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 30
 
     tmdb_api_key: SecretStr
+    database_url: SecretStr | None = None
 
 
 settings = Settings()  # type: ignore[call-arg] # Loaded from .env file
