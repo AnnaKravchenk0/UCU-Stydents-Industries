@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MovieMatch - My Collection</title>
+    <link rel="stylesheet" href="style.css">
     <style>
         :root {
             --bg-dark: #121218;
@@ -36,7 +37,34 @@
         .page-title h1 { font-size:2.5rem; margin-bottom:5px; }
         .page-subtitle { color:var(--text-sec); }
 
-        .movies-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:30px; }
+        /* Пошук */
+        .search-section {
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: center;
+        }
+        .search-input {
+            width: 100%;
+            max-width: 500px;
+            padding: 12px 20px;
+            border-radius: 30px;
+            border: 1px solid #444;
+            background: var(--panel-bg);
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.3s;
+        }
+        .search-input:focus {
+            border-color: var(--accent-pink);
+            box-shadow: 0 0 10px rgba(184,59,136,0.3);
+        }
+
+        .movies-grid {
+            display: grid;
+            grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));
+            gap:30px;
+        }
         .movie-card {
             background-color:var(--panel-bg); border-radius:12px; overflow:hidden;
             transition:transform 0.3s, box-shadow 0.3s; position:relative;
@@ -59,23 +87,64 @@
 
         .empty-msg { color:var(--text-sec); grid-column:1/-1; text-align:center; padding:60px 0; font-size:1.1rem; }
         .empty-msg a { color:var(--accent-pink); text-decoration:none; }
+
+        /* Пагінація */
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 35px;
+            padding-top: 25px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .page-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+        .page-btn:hover:not(:disabled) {
+            background: rgba(184,59,136,0.3);
+            border-color: var(--accent-pink);
+        }
+        .page-btn:disabled {
+            opacity: 0.3;
+            cursor: default;
+        }
+
+        .page-info {
+            color: var(--text-sec);
+            font-size: 0.9rem;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        /* Мобільна адаптація */
+        @media (max-width: 768px) {
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            .page-title h1 { font-size: 2rem; }
+            .movies-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+            .movie-poster { height: 220px; }
+        }
+        @media (max-width: 480px) {
+            .movies-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+            .movie-poster { height: 180px; }
+        }
     </style>
 </head>
 <body>
-    <nav>
-        <div class="logo"><a href="index.html">MovieMatch</a></div>
-        <div class="nav-links">
-            <a href="index.html">Popular</a>
-            <a href="index.html#about">About</a>
-            <a href="index.html#contacts">Contacts</a>
-            <a href="profile.html">Friends</a>
-            <a href="my_films.html" class="active" style="color:var(--accent-pink);">My Collection</a>
-        </div>
-        <div class="user-menu">
-            <span id="nav-username"></span>
-            <div class="avatar"></div>
-        </div>
-    </nav>
+    <!-- Header буде вставлено через header.js -->
 
     <div class="container">
         <div class="page-header">
@@ -84,59 +153,95 @@
                 <div class="page-subtitle" id="subtitle">Loading...</div>
             </div>
         </div>
+
+        <!-- Пошук -->
+        <div class="search-section">
+            <input type="text" id="searchMovies" class="search-input" placeholder="🔍 Search in my movies..." oninput="filterMyMovies()">
+        </div>
+
         <div class="movies-grid" id="grid"></div>
+
+        <!-- Пагінація -->
+        <div class="pagination" id="pagination" style="display:none;">
+            <button class="page-btn" id="btn-prev" onclick="changePage(-1)">← Prev</button>
+            <span class="page-info" id="page-info">Page 1 / 1</span>
+            <button class="page-btn" id="btn-next" onclick="changePage(1)">Next →</button>
+        </div>
     </div>
 
+    <script src="header.js"></script>
     <script>
         const BASE_URL = 'http://127.0.0.1:8000';
+        let allMovies = [];          // всі фільми з бекенду
+        let filteredMovies = [];      // відфільтровані за пошуком
+        let currentPage = 1;
+        const PER_PAGE = 20;
 
         async function init() {
             const token  = localStorage.getItem('token');
             const userId = localStorage.getItem('userId');
 
-            // Якщо немає токена — редирект на логін
             if (!token) {
                 window.location.href = 'login.html';
                 return;
             }
 
-            // Показуємо ім'я в навігації
-            const username = localStorage.getItem('username');
-            if (username) document.getElementById('nav-username').textContent = username;
-
             try {
-                // GET /movies/{userId}/liked — вподобані фільми поточного юзера
                 const resp = await fetch(`${BASE_URL}/movies/${userId}/liked`);
-
                 if (!resp.ok) {
                     document.getElementById('subtitle').textContent = 'Failed to load movies.';
                     return;
                 }
-
-                const movies = await resp.json();
-                renderMovies(movies);
-
+                allMovies = await resp.json();
+                filteredMovies = [...allMovies];
+                renderMovies();
+                document.getElementById('subtitle').textContent =
+                    `You have ${allMovies.length} movie${allMovies.length !== 1 ? 's' : ''} in your collection!`;
             } catch (e) {
                 window.location.href = 'p_error.html';
             }
         }
 
-        function renderMovies(movies) {
+        function filterMyMovies() {
+            const query = document.getElementById('searchMovies').value.trim().toLowerCase();
+            if (!query) {
+                filteredMovies = [...allMovies];
+            } else {
+                filteredMovies = allMovies.filter(m =>
+                    m.movie_name.toLowerCase().includes(query)
+                );
+            }
+            currentPage = 1;
+            renderMovies();
+        }
+
+        function renderMovies() {
             const grid = document.getElementById('grid');
-            const subtitle = document.getElementById('subtitle');
+            const pagination = document.getElementById('pagination');
 
-            subtitle.textContent = `You have ${movies.length} movie${movies.length !== 1 ? 's' : ''} in your collection!`;
-
-            if (!movies.length) {
+            if (!filteredMovies.length) {
                 grid.innerHTML = `
                     <div class="empty-msg">
-                        No movies yet.<br>
-                        Go to <a href="choose.html">Choose</a> to add some!
+                        No movies found.
                     </div>`;
+                pagination.style.display = 'none';
                 return;
             }
 
-            grid.innerHTML = movies.map(m => {
+            const totalPages = Math.ceil(filteredMovies.length / PER_PAGE);
+            const start = (currentPage - 1) * PER_PAGE;
+            const pageMovies = filteredMovies.slice(start, start + PER_PAGE);
+
+            if (filteredMovies.length > PER_PAGE) {
+                pagination.style.display = 'flex';
+                document.getElementById('page-info').textContent = `Page ${currentPage} / ${totalPages}`;
+                document.getElementById('btn-prev').disabled = currentPage === 1;
+                document.getElementById('btn-next').disabled = currentPage === totalPages;
+            } else {
+                pagination.style.display = 'none';
+            }
+
+            grid.innerHTML = pageMovies.map(m => {
                 const posterUrl = m.poster_path
                     ? `https://image.tmdb.org/t/p/w500${m.poster_path}`
                     : '';
@@ -156,19 +261,27 @@
             }).join('');
         }
 
+        function changePage(direction) {
+            const totalPages = Math.ceil(filteredMovies.length / PER_PAGE);
+            currentPage = Math.max(1, Math.min(totalPages, currentPage + direction));
+            renderMovies();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
         function removeCard(movieId) {
-            // Видаляємо картку візуально (анімація)
-            // Якщо хочеш також видаляти з бази — потрібен окремий DELETE ендпоінт на беку
             const card = document.getElementById(`card-${movieId}`);
             card.style.transition = '0.3s';
             card.style.transform  = 'scale(0.8)';
             card.style.opacity    = '0';
             setTimeout(() => {
                 card.remove();
-                // Оновлюємо лічильник
                 const remaining = document.querySelectorAll('.movie-card').length;
                 document.getElementById('subtitle').textContent =
                     `You have ${remaining} movie${remaining !== 1 ? 's' : ''} in your collection!`;
+                // Також видаляємо з масивів
+                allMovies = allMovies.filter(m => m.id !== movieId);
+                filteredMovies = filteredMovies.filter(m => m.id !== movieId);
+                renderMovies(); // оновлюємо пагінацію
             }, 300);
         }
 

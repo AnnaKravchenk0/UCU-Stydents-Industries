@@ -6,6 +6,7 @@
     <title>MovieMatch - Choose Movie</title>
     <link rel="stylesheet" href="style.css">
     <style>
+        /* Additional styles specific to choose.html */
         .choose-wrapper {
             display: flex;
             justify-content: center;
@@ -13,6 +14,7 @@
             min-height: calc(100vh - 80px);
             perspective: 1500px;
             overflow: hidden;
+            padding: 20px;
         }
 
         .movie-card-big {
@@ -38,7 +40,6 @@
             text-align: center;
         }
 
-        /* Свайп анімації */
         .swipe-like    { transform: translateX(200%) rotate(30deg) !important; opacity: 0 !important; }
         .swipe-dislike { transform: translateX(-200%) rotate(-30deg) !important; opacity: 0 !important; }
         .new-card-anim { animation: fadeInScale 0.4s ease-out; }
@@ -48,7 +49,6 @@
             to   { opacity: 1; transform: scale(1); }
         }
 
-        /* Підказка LIKE / NOPE */
         .swipe-label {
             position: absolute;
             top: 40px;
@@ -67,7 +67,6 @@
         .show-like    .label-like    { opacity: 1; }
         .show-dislike .label-dislike { opacity: 1; }
 
-        /* Колонки */
         .col-side {
             flex: 1;
             color: var(--text-sec);
@@ -134,7 +133,6 @@
         .btn-circle:hover  { transform: scale(1.15); box-shadow: 0 8px 25px rgba(0,0,0,0.4); }
         .btn-circle:active { transform: scale(0.95); }
 
-        /* Блоки правої колонки */
         .info-block { margin-bottom: 28px; }
         .info-label {
             color: white;
@@ -186,7 +184,6 @@
             white-space: nowrap;
         }
 
-        /* Toast */
         .toast {
             position: fixed;
             bottom: 40px;
@@ -205,37 +202,127 @@
         }
         .toast.show  { opacity: 1; transform: translateX(-50%) translateY(0); }
         .toast.error { background: #e74c3c; }
+
+        /* Search controls */
+        .search-controls {
+            position: absolute;
+            top: 100px;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            padding: 0 20px;
+        }
+        .search-controls input,
+        .search-controls select {
+            padding: 10px 15px;
+            border-radius: 30px;
+            border: none;
+            background: #2a2440;
+            color: white;
+            width: 250px;
+            font-size: 1rem;
+        }
+        .search-controls button {
+            padding: 10px 25px;
+        }
+
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            .movie-card-big {
+                flex-direction: column;
+                width: 95%;
+                padding: 20px;
+                min-height: auto;
+            }
+            .col-side, .col-center {
+                width: 100%;
+            }
+            .movie-main-img {
+                max-width: 250px;
+            }
+            .controls {
+                gap: 15px;
+            }
+            .btn-circle {
+                width: 60px;
+                height: 60px;
+                font-size: 24px;
+            }
+            .swipe-label {
+                font-size: 1.8rem;
+                top: 20px;
+            }
+            .search-controls input,
+            .search-controls select {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+        @media (max-width: 480px) {
+            .movie-card-big {
+                padding: 15px;
+            }
+            .movie-meta {
+                font-size: 0.8rem;
+            }
+            .btn-circle {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+            .counter {
+                top: -30px;
+                font-size: 0.7rem;
+            }
+        }
     </style>
 </head>
 <body>
-
-    <header>
-        <nav style="background:#0a0a0e; padding:15px 40px; display:flex; justify-content:space-between; align-items:center;">
-            <a href="index.html" style="color:white; text-decoration:none; font-weight:bold; font-size:1.5rem;">MovieMatch</a>
-            <div style="display:flex; align-items:center; gap:12px;">
-                <span id="nav-username" style="color:var(--text-sec);"></span>
-                <div style="width:35px; height:35px; background:var(--accent-pink); border-radius:50%;"></div>
-            </div>
-        </nav>
-    </header>
+    <!-- Header буде вставлено через header.js -->
 
     <div class="choose-wrapper">
-        <div class="movie-card-big" id="main-card">
+        <!-- Панель пошуку над карткою -->
+        <div class="search-controls">
+            <input type="text" id="search-name" placeholder="Назва фільму">
+            <select id="genre-select">
+                <option value="">Всі жанри</option>
+                <option value="28">Бойовик</option>
+                <option value="12">Пригоди</option>
+                <option value="16">Анімація</option>
+                <option value="35">Комедія</option>
+                <option value="80">Кримінал</option>
+                <option value="99">Документальний</option>
+                <option value="18">Драма</option>
+                <option value="10751">Сімейний</option>
+                <option value="14">Фентезі</option>
+                <option value="36">Історичний</option>
+                <option value="27">Жахи</option>
+                <option value="10402">Музика</option>
+                <option value="9648">Містика</option>
+                <option value="10749">Романтика</option>
+                <option value="878">Наукова фантастика</option>
+                <option value="10770">Телефільм</option>
+                <option value="53">Трилер</option>
+                <option value="10752">Військовий</option>
+                <option value="37">Вестерн</option>
+            </select>
+            <button onclick="searchMovies()" class="btn-choose">Пошук</button>
+        </div>
 
-            <!-- Підказки при свайпі -->
+        <div class="movie-card-big" id="main-card">
             <div class="swipe-label label-like">LIKE</div>
             <div class="swipe-label label-dislike">NOPE</div>
-
-            <!-- Лічильник -->
             <div class="counter" id="counter"></div>
 
-            <!-- Лівий стовпець: опис -->
             <div class="col-side" id="left-col">
                 <div class="info-label">Overview</div>
                 <p id="movie-desc">Loading...</p>
             </div>
 
-            <!-- Центральний стовпець: постер + кнопки -->
             <div class="col-center" id="center-col">
                 <img src="" alt="" class="movie-main-img" id="movie-img">
                 <h2 id="movie-title">—</h2>
@@ -249,7 +336,6 @@
                 </p>
             </div>
 
-            <!-- Правий стовпець: жанри, рейтинг, дата -->
             <div class="col-side" id="right-col">
                 <div class="info-block">
                     <div class="info-label">Genres</div>
@@ -267,37 +353,29 @@
                     <div id="movie-date" style="color:white; font-size:1rem;"></div>
                 </div>
             </div>
-
         </div>
     </div>
 
     <div class="toast" id="toast"></div>
 
+    <script src="header.js"></script>
     <script>
         const BASE_URL = 'http://127.0.0.1:8000';
 
         let movies      = [];
         let index       = 0;
-        let isSwiping   = false;  // блокуємо подвійний клік
-        let currentPage = 1;      // поточна сторінка TMDB
-        let totalPages  = 1;      // всього сторінок (з відповіді TMDB)
-        let isLoading   = false;  // блокуємо подвійне підвантаження
+        let isSwiping   = false;
+        let currentPage = 1;
+        let totalPages  = 1;
+        let isLoading   = false;
 
-        // Показуємо ім'я якщо залогінений
         const token    = localStorage.getItem('token');
         const username = localStorage.getItem('username');
 
-        if (username) {
-            document.getElementById('nav-username').textContent = username;
-        } else {
+        if (!username) {
             document.getElementById('auth-hint').style.display = 'block';
         }
 
-        // ─────────────────────────────────────────────────────
-        // 1. Завантаження фільмів з бека
-        // GET /movies/ → { page, results: [...], total_pages }
-        // ─────────────────────────────────────────────────────
-        // Перемішуємо масив випадково (Fisher-Yates shuffle)
         function shuffle(arr) {
             for (let i = arr.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -306,57 +384,62 @@
             return arr;
         }
 
-        // Підвантажуємо нову сторінку фільмів і додаємо до існуючих
-        async function fetchMovies(page = 1) {
+        async function fetchMovies(params = {}) {
             if (isLoading) return;
             isLoading = true;
 
             try {
-                // Вибираємо випадкову сторінку щоб фільми були різними
-                const randomPage = page === 1
-                    ? Math.floor(Math.random() * 50) + 1  // перший раз — рандомна стор.
-                    : page;
+                const queryParams = new URLSearchParams();
+                if (params.name) queryParams.append('name', params.name);
+                if (params.genre) queryParams.append('genre', params.genre);
+                if (params.page) queryParams.append('page', params.page);
+                const url = `${BASE_URL}/movies/${queryParams.toString() ? '?' + queryParams : ''}`;
 
-                const res  = await fetch(`${BASE_URL}/movies/?page=${randomPage}`);
+                const res = await fetch(url);
                 const data = await res.json();
 
                 totalPages = data.total_pages || 1;
 
-                // Перемішуємо щоб порядок був випадковим
                 const newMovies = shuffle(data.results || []);
-
                 if (!newMovies.length) {
                     document.getElementById('movie-desc').textContent = 'No movies found.';
                     isLoading = false;
                     return;
                 }
 
-                movies = [...movies, ...newMovies];
+                if (params.page === 1) {
+                    movies = newMovies;
+                } else {
+                    movies = [...movies, ...newMovies];
+                }
                 isLoading = false;
 
-                // Показуємо перший фільм тільки при першому завантаженні
-                if (page === 1) renderMovie();
-
+                if (params.page === 1) {
+                    index = 0;
+                    renderMovie();
+                }
             } catch (e) {
                 isLoading = false;
-                document.getElementById('movie-desc').textContent =
-                    'Could not connect to server.';
+                document.getElementById('movie-desc').textContent = 'Could not connect to server.';
             }
         }
 
-        // ─────────────────────────────────────────────────────
-        // 2. Відображення поточного фільму
-        // ─────────────────────────────────────────────────────
+        function searchMovies() {
+            const name = document.getElementById('search-name').value.trim();
+            const genre = document.getElementById('genre-select').value;
+            fetchMovies({ name, genre, page: 1 });
+        }
+
+        fetchMovies({ page: 1 });
+
         function renderMovie() {
             const card = document.getElementById('main-card');
 
-            // Підвантажуємо наступну сторінку коли залишилось 3 фільми
             if (index >= movies.length - 3 && !isLoading) {
                 currentPage = Math.floor(Math.random() * 50) + 1;
-                fetchMovies(currentPage);
+                fetchMovies({ page: currentPage });
             }
 
-            // Якщо фільми ще не підвантажились — показуємо лоадер
             if (index >= movies.length) {
                 document.getElementById('movie-title').textContent = 'Loading...';
                 document.getElementById('movie-desc').textContent  = 'Fetching new movies...';
@@ -365,159 +448,101 @@
                 document.getElementById('movie-rating').textContent = '';
                 document.getElementById('movie-date').textContent   = '';
                 document.getElementById('counter').textContent      = '';
-                // Перевіряємо кожні 500мс поки не з'являться нові фільми
                 setTimeout(() => renderMovie(), 500);
                 return;
             }
 
             const m = movies[index];
 
-            // Лічильник — скільки переглянуто
-            document.getElementById('counter').textContent =
-                `Viewed: ${index + 1}`;
+            document.getElementById('counter').textContent = `Viewed: ${index + 1}`;
+            document.getElementById('movie-title').textContent = m.title || m.original_title || 'Unknown';
+            document.getElementById('movie-desc').textContent = m.overview || 'No description available.';
 
-            // Назва фільму
-            document.getElementById('movie-title').textContent =
-                m.title || m.original_title || 'Unknown';
-
-            // Опис
-            document.getElementById('movie-desc').textContent =
-                m.overview || 'No description available.';
-
-            // Постер — poster_url вже повний URL сформований беком
             const img = document.getElementById('movie-img');
             if (m.poster_url) {
-                img.src             = m.poster_url;
-                img.alt             = m.title || '';
-                img.style.display   = 'block';
+                img.src = m.poster_url;
+                img.alt = m.title || '';
+                img.style.display = 'block';
             } else {
                 img.style.display = 'none';
             }
 
-            // Рейтинг (0–10 → показуємо з зіркою)
             const avg = m.vote_average;
             if (avg && avg > 0) {
                 document.getElementById('movie-rating').textContent = `★ ${avg.toFixed(1)} / 10`;
-                document.getElementById('rating-bar').style.width   = `${avg * 10}%`;
+                document.getElementById('rating-bar').style.width = `${avg * 10}%`;
             } else {
                 document.getElementById('movie-rating').textContent = 'No ratings yet';
-                document.getElementById('rating-bar').style.width   = '0%';
+                document.getElementById('rating-bar').style.width = '0%';
             }
 
-            // Дата виходу
-            document.getElementById('movie-date').textContent =
-                m.release_date || '—';
+            document.getElementById('movie-date').textContent = m.release_date || '—';
 
-            // Жанри — genres_str масив: ["Action", "Drama"]
             const genres = m.genres_str || [];
             document.getElementById('movie-genres').innerHTML = genres.length
                 ? genres.map(g => `<span class="genre-tag">${g}</span>`).join('')
                 : '<span style="color:var(--text-sec)">—</span>';
         }
 
-        // ─────────────────────────────────────────────────────
-        // 3. Обробка свайпу (like / dislike)
-        // ─────────────────────────────────────────────────────
         async function handleSwipe(type) {
-            // Блокуємо якщо вже йде анімація або фільмів немає
             if (isSwiping || !movies[index]) return;
             isSwiping = true;
 
             const card = document.getElementById('main-card');
-
-            // Показуємо підказку LIKE або NOPE
             card.classList.add(type === 'like' ? 'show-like' : 'show-dislike');
 
-            // Якщо лайк — зберігаємо в базу даних у фоні (без await)
-            // Не блокуємо анімацію — запит іде паралельно
-            if (type === 'like') {
+            if (type === 'like' && token) {
                 saveLike(movies[index]);
             }
 
-            // Анімація вильоту
             card.classList.add(type === 'like' ? 'swipe-like' : 'swipe-dislike');
 
-            // Після анімації — показуємо наступний фільм
             setTimeout(() => {
                 index++;
-
-                card.classList.remove(
-                    'swipe-like', 'swipe-dislike',
-                    'show-like',  'show-dislike'
-                );
+                card.classList.remove('swipe-like', 'swipe-dislike', 'show-like', 'show-dislike');
                 card.classList.add('new-card-anim');
                 renderMovie();
-
                 setTimeout(() => {
                     card.classList.remove('new-card-anim');
                     isSwiping = false;
                 }, 400);
-
             }, 500);
         }
 
-        // ─────────────────────────────────────────────────────
-        // 4. Збереження лайку в базу даних
-        // POST /movies/like-movie
-        // Бек очікує: { id, poster_path, movie_name }
-        // ─────────────────────────────────────────────────────
         async function saveLike(movie) {
-            // Якщо не залогінений — просто пропускаємо (не блокуємо свайп)
-            if (!token) return;
-
             try {
-                const resp = await fetch(`${BASE_URL}/movies/like-movie`, {
+                await fetch(`${BASE_URL}/movies/like-movie`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({
-                        id:           movie.id,
-                        movie_name:   movie.title || movie.original_title || 'Unknown',
-                        poster_path:  movie.poster_path  || null,
-                        poster_url:   movie.poster_url   || null,
-                        overview:     movie.overview     || null,
+                        id: movie.id,
+                        movie_name: movie.title || movie.original_title || 'Unknown',
+                        poster_path: movie.poster_path || null,
+                        poster_url: movie.poster_url || null,
+                        overview: movie.overview || null,
                         release_date: movie.release_date || null,
                         vote_average: movie.vote_average || null
                     })
                 });
-
-                if (resp.ok) {
-                    const data = await resp.json();
-                    // "Movie added to favorites" або "Movie already in favorites"
-                    showToast('❤ ' + (data.message || 'Saved!'));
-                } else if (resp.status === 401) {
-                    localStorage.removeItem('token');
-                    showToast('Session expired. Please log in again.', true);
-                }
-
             } catch (e) {
-                // Мережева помилка — мовчки логуємо, не блокуємо свайп
                 console.error('saveLike error:', e);
             }
         }
 
-        // ─────────────────────────────────────────────────────
-        // 5. Toast сповіщення
-        // ─────────────────────────────────────────────────────
         function showToast(msg, isError = false) {
             const toast = document.getElementById('toast');
             toast.textContent = msg;
-            toast.className   = 'toast show' + (isError ? ' error' : '');
+            toast.className = 'toast show' + (isError ? ' error' : '');
             setTimeout(() => { toast.className = 'toast'; }, 2500);
         }
 
-        // ─────────────────────────────────────────────────────
-        // 6. Клавіатура: стрілки для свайпу
-        // ─────────────────────────────────────────────────────
         document.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowRight') handleSwipe('like');
             if (e.key === 'ArrowLeft')  handleSwipe('dislike');
         });
-
-        // Старт
-        fetchMovies();
     </script>
 </body>
 </html>

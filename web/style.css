@@ -272,3 +272,113 @@ header {
 .auth-buttons { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
 .btn-main { background-color: var(--accent-pink); color: white; padding: 10px 30px; border-radius: 20px; text-decoration: none; border: none; cursor: pointer; }
 .btn-alt { color: var(--text-sec); text-decoration: none; font-size: 0.9rem; }
+
+/* Mobile styles */
+@media (max-width: 768px) {
+    .top-nav {
+        flex-direction: column;
+        padding: 10px 15px;
+        gap: 10px;
+    }
+
+    .nav-links {
+        position: static;
+        transform: none;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    .user-menu, .auth-buttons {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .sub-nav {
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 5px;
+    }
+
+    .hero h1 {
+        font-size: 2rem;
+    }
+
+    .movie-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
+    }
+
+    .movie-img {
+        height: 200px;
+    }
+
+    /* profile.html */
+    .profile-container {
+        grid-template-columns: 1fr;
+        padding: 10px;
+    }
+
+    .movies-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    }
+
+    /* search_friends.html */
+    .search-box {
+        flex-direction: column;
+    }
+
+    .search-input {
+        width: 100%;
+    }
+
+    .user-card {
+        flex-wrap: wrap;
+    }
+
+    /* auth pages */
+    .auth-box {
+        width: 90%;
+        padding: 30px 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero {
+        padding: 40px 15px;
+    }
+
+    .hero h1 {
+        font-size: 1.8rem;
+    }
+
+    .btn-choose {
+        padding: 12px 30px;
+        font-size: 1rem;
+    }
+
+    .movie-img {
+        height: 180px;
+    }
+
+    .movie-info h3 {
+        font-size: 0.9rem;
+    }
+
+    .movie-info p {
+        font-size: 0.7rem;
+    }
+
+    /* auth pages */
+    .auth-box h1 {
+        font-size: 1.5rem;
+    }
+
+    .input-group input {
+        padding: 10px;
+    }
+
+    .auth-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
