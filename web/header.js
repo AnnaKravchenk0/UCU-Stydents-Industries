@@ -21,8 +21,10 @@ function renderHeader() {
 
     if (token) {
         navContent += `
+                <a href="choose.html" style="color: white; text-decoration: none;">Choose</a>
                 <a href="my_films.html" style="color: white; text-decoration: none;">My Collection</a>
                 <a href="profile.html" style="color: white; text-decoration: none;">Friends</a>
+                <a href="search_friends.html" style="color: white; text-decoration: none;">Find Friends</a>
 
                 <div class="user-menu" style="display: flex; align-items: center; gap: 10px;">
                     <span style="font-weight: 600; color: white;">${username}</span>
