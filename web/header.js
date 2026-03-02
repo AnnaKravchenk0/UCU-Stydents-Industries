@@ -6,7 +6,7 @@ function renderHeader() {
 
     const header = document.createElement('header');
     const token = localStorage.getItem('token');
-    const username = localStorage.getItem('username') || 'Користувач';
+    const username = localStorage.getItem('username') || 'User';
 
     let navContent = `
         <nav class="top-nav">

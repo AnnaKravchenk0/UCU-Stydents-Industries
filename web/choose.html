@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -202,7 +202,7 @@
         .toast.show  { opacity: 1; transform: translateX(-50%) translateY(0); }
         .toast.error { background: #e74c3c; }
 
-        /* Фільтр за жанром */
+        /* Genre filter */
         .genre-filter {
             position: absolute;
             top: -60px;
@@ -241,7 +241,7 @@
             background: var(--accent-hover);
         }
 
-        /* Мобільна адаптація */
+        /* Mobile adaptation */
         @media (max-width: 768px) {
             .movie-card-big {
                 flex-direction: column;
@@ -294,35 +294,35 @@
     </style>
 </head>
 <body>
-    <!-- Header буде вставлено через header.js -->
+    <!-- Header will be inserted by header.js -->
 
     <div class="choose-wrapper">
         <div class="movie-card-big" id="main-card">
-            <!-- Фільтр за жанром -->
+            <!-- Genre filter -->
             <div class="genre-filter">
                 <select id="genre-select">
-                    <option value="">Всі жанри</option>
-                    <option value="28">Бойовик</option>
-                    <option value="12">Пригоди</option>
-                    <option value="16">Анімація</option>
-                    <option value="35">Комедія</option>
-                    <option value="80">Кримінал</option>
-                    <option value="99">Документальний</option>
-                    <option value="18">Драма</option>
-                    <option value="10751">Сімейний</option>
-                    <option value="14">Фентезі</option>
-                    <option value="36">Історичний</option>
-                    <option value="27">Жахи</option>
-                    <option value="10402">Музика</option>
-                    <option value="9648">Містика</option>
-                    <option value="10749">Романтика</option>
-                    <option value="878">Наукова фантастика</option>
-                    <option value="10770">Телефільм</option>
-                    <option value="53">Трилер</option>
-                    <option value="10752">Військовий</option>
-                    <option value="37">Вестерн</option>
+                    <option value="">All genres</option>
+                    <option value="28">Action</option>
+                    <option value="12">Adventure</option>
+                    <option value="16">Animation</option>
+                    <option value="35">Comedy</option>
+                    <option value="80">Crime</option>
+                    <option value="99">Documentary</option>
+                    <option value="18">Drama</option>
+                    <option value="10751">Family</option>
+                    <option value="14">Fantasy</option>
+                    <option value="36">History</option>
+                    <option value="27">Horror</option>
+                    <option value="10402">Music</option>
+                    <option value="9648">Mystery</option>
+                    <option value="10749">Romance</option>
+                    <option value="878">Science Fiction</option>
+                    <option value="10770">TV Movie</option>
+                    <option value="53">Thriller</option>
+                    <option value="10752">War</option>
+                    <option value="37">Western</option>
                 </select>
-                <button onclick="applyGenreFilter()">Застосувати</button>
+                <button onclick="applyGenreFilter()">Apply</button>
             </div>
 
             <div class="swipe-label label-like">LIKE</div>
@@ -379,7 +379,7 @@
         let currentPage = 1;
         let totalPages  = 1;
         let isLoading   = false;
-        let currentGenre = ''; // поточний вибраний жанр
+        let currentGenre = '';
 
         const token    = localStorage.getItem('token');
         const username = localStorage.getItem('username');
@@ -405,7 +405,6 @@
                 if (genre) {
                     url += `&genre=${genre}`;
                 } else {
-                    // Якщо жанр не вибрано, беремо випадкову сторінку популярних
                     const randomPage = Math.floor(Math.random() * 50) + 1;
                     url = `${BASE_URL}/movies/?page=${randomPage}`;
                 }
@@ -446,13 +445,11 @@
             fetchMovies(1, genre);
         }
 
-        // Початкове завантаження без жанру (популярні)
         fetchMovies(1);
 
         function renderMovie() {
             const card = document.getElementById('main-card');
 
-            // Підвантажуємо наступну сторінку, якщо залишилось мало
             if (index >= movies.length - 3 && !isLoading) {
                 currentPage++;
                 fetchMovies(currentPage, currentGenre);
@@ -478,7 +475,6 @@
 
             const img = document.getElementById('movie-img');
             if (m.poster_url) {
-                // Додаємо параметр для обходу кешу
                 img.src = m.poster_url + '?cb=' + new Date().getTime();
                 img.alt = m.title || '';
                 img.style.display = 'block';

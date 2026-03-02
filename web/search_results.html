@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -240,7 +240,7 @@
     </style>
 </head>
 <body>
-    <!-- Header буде вставлено через header.js -->
+    <!-- Header will be inserted by header.js -->
 
     <div class="search-page">
         <div class="search-header">
@@ -254,7 +254,7 @@
         </div>
 
         <div class="results-grid" id="resultsGrid">
-            <!-- Результати будуть тут -->
+            <!-- Results will appear here -->
         </div>
 
         <div class="pagination" id="pagination" style="display:none;">
@@ -411,7 +411,6 @@
             if (e.key === 'Enter') searchMovies();
         });
 
-        // За бажанням можна показати підказку при старті
         window.onload = () => {
             document.getElementById('resultsGrid').innerHTML = '<div class="empty-msg">Enter a movie name to start searching.</div>';
         };
