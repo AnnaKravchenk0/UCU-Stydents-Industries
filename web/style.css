@@ -16,15 +16,19 @@ body {
 }
 
 /* --- ШАПКА (HEADER) --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 header {
     background-color: var(--nav-bg);
     border-bottom: 1px solid #333;
-    padding-bottom: 10px;
-
-    /* ДОДАНО ДЛЯ ЗАКРІПЛЕННЯ: */
-    position: sticky;  /* Робить елемент "липким" */
-    top: 0;            /* Приклеює до самого верху екрана */
-    z-index: 1000;     /* Гарантує, що меню буде ПОВЕРХ усіх карток і текстів */
+    padding: 10px 0; /* Рівномірні відступи зверху і знизу */
+    position: sticky;
+    top: 0;
+    z-index: 1000;
     box-shadow: 0 4px 10px rgba(0,0,0,0.3); /* Легка тінь, щоб відділити меню від контенту */
 }
 

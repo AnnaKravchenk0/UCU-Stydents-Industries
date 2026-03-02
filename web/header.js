@@ -21,6 +21,7 @@ function renderHeader() {
     `;
 
     if (token) {
+        // Додаємо нові пункти безпосередньо в список <ul>
         navContent += `
                 <a href="my_films.html" style="color: white; text-decoration: none;">My Collection</a>
                 <a href="profile.html" style="color: white; text-decoration: none;">Friends</a>
@@ -31,13 +32,14 @@ function renderHeader() {
                         ${username.charAt(0).toUpperCase()}
                     </div>
                 </div>
-
-                <a href="#" onclick="logout()" style="color: var(--accent-pink); text-decoration: none; font-weight: bold; margin-left: 10px; transition: 0.3s;">Log Out</a>
+                <a href="#" onclick="logout()" style="color: var(--accent-pink); text-decoration: none; font-weight: bold; margin-left: 10px;">Log Out</a>
         `;
     } else {
         navContent += `
-                <a href="login.html" style="color: white; text-decoration: none; font-weight: 500; transition: 0.3s;">Log In</a>
-                <a href="signup.html" style="color: var(--accent-pink); text-decoration: none; font-weight: bold; transition: 0.3s;">Sign Up</a>
+            </ul>
+            <div class="auth-lang" id="nav-right" style="display: flex; gap: 15px; align-items: center;">
+                <a href="login.html" style="color: white; text-decoration: none;">Log In</a>
+                <a href="signup.html" style="color: var(--accent-pink); text-decoration: none; font-weight: bold;">Sign Up</a>
         `;
     }
 
