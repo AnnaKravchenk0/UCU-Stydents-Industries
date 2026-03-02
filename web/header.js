@@ -15,16 +15,15 @@ function renderHeader() {
                 <li><a href="index.html#popular">Popular</a></li>
                 <li><a href="index.html#about">About</a></li>
                 <li><a href="index.html#contacts">Contacts</a></li>
+                <li><a href="search_results.html">Search</a></li>
             </ul>
             <div class="auth-lang" id="nav-right" style="display: flex; gap: 15px; align-items: center;">
     `;
 
     if (token) {
         navContent += `
-                <a href="choose.html" style="color: white; text-decoration: none;">Choose</a>
                 <a href="my_films.html" style="color: white; text-decoration: none;">My Collection</a>
                 <a href="profile.html" style="color: white; text-decoration: none;">Friends</a>
-                <a href="search_friends.html" style="color: white; text-decoration: none;">Find Friends</a>
 
                 <div class="user-menu" style="display: flex; align-items: center; gap: 10px;">
                     <span style="font-weight: 600; color: white;">${username}</span>
@@ -51,7 +50,7 @@ function renderHeader() {
     if (currentPage === 'index.html' || currentPage === '') {
         navContent += `
             <nav class="sub-nav">
-                <a href="index.html" class="active-sub" onclick="goToChoose()">Movies</a>
+                <a href="choose.html" class="active-sub">Movies</a>
                 <a href="development.html">Books</a>
                 <a href="development.html">Cartoons</a>
                 <a href="development.html">Audiobooks</a>
@@ -66,15 +65,6 @@ function renderHeader() {
     header.innerHTML = navContent;
 
     document.body.prepend(header);
-}
-
-function goToChoose() {
-    const token = localStorage.getItem('token');
-    if (token) {
-        window.location.href = 'choose.html';
-    } else {
-        window.location.href = 'login.html';
-    }
 }
 
 function logout() {
