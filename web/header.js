@@ -15,30 +15,31 @@ function renderHeader() {
                 <li><a href="index.html#popular">Popular</a></li>
                 <li><a href="index.html#about">About</a></li>
                 <li><a href="index.html#contacts">Contacts</a></li>
-            </ul>
-            <div class="auth-lang" id="nav-right" style="display: flex; gap: 15px; align-items: center;">
     `;
 
     if (token) {
+        // Додаємо нові пункти безпосередньо в список <ul>
         navContent += `
-                <a href="choose.html" style="color: white; text-decoration: none;">Choose</a>
-                <a href="my_films.html" style="color: white; text-decoration: none;">My Collection</a>
-                <a href="profile.html" style="color: white; text-decoration: none;">Friends</a>
-                <a href="search_friends.html" style="color: white; text-decoration: none;">Find Friends</a>
-
+                <li><a href="search_friends.html">Search Friends</a></li>
+                <li><a href="my_films.html">My Collection</a></li>
+                <li><a href="profile.html" style="color: var(--accent-pink);">Friends</a></li>
+                <li><a href="choose.html">Choose</a></li>
+            </ul>
+            <div class="auth-lang" id="nav-right" style="display: flex; gap: 15px; align-items: center;">
                 <div class="user-menu" style="display: flex; align-items: center; gap: 10px;">
                     <span style="font-weight: 600; color: white;">${username}</span>
                     <div class="user-avatar-circle" style="width: 36px; height: 36px; background: var(--accent-pink); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
                         ${username.charAt(0).toUpperCase()}
                     </div>
                 </div>
-
-                <a href="#" onclick="logout()" style="color: var(--accent-pink); text-decoration: none; font-weight: bold; margin-left: 10px; transition: 0.3s;">Log Out</a>
+                <a href="#" onclick="logout()" style="color: var(--accent-pink); text-decoration: none; font-weight: bold; margin-left: 10px;">Log Out</a>
         `;
     } else {
         navContent += `
-                <a href="login.html" style="color: white; text-decoration: none; font-weight: 500; transition: 0.3s;">Log In</a>
-                <a href="signup.html" style="color: var(--accent-pink); text-decoration: none; font-weight: bold; transition: 0.3s;">Sign Up</a>
+            </ul>
+            <div class="auth-lang" id="nav-right" style="display: flex; gap: 15px; align-items: center;">
+                <a href="login.html" style="color: white; text-decoration: none;">Log In</a>
+                <a href="signup.html" style="color: var(--accent-pink); text-decoration: none; font-weight: bold;">Sign Up</a>
         `;
     }
 
