@@ -6,7 +6,7 @@ function renderHeader() {
 
     const header = document.createElement('header');
     const token = localStorage.getItem('token');
-    const username = localStorage.getItem('username') || 'User';
+    const username = localStorage.getItem('username') || 'Користувач';
 
     let navContent = `
         <nav class="top-nav">
@@ -15,44 +15,40 @@ function renderHeader() {
                 <li><a href="index.html#popular">Popular</a></li>
                 <li><a href="index.html#about">About</a></li>
                 <li><a href="index.html#contacts">Contacts</a></li>
-                <li><a href="search_results.html">Search</a></li>
-            </ul>
-            <div class="auth-lang" id="nav-right" style="display: flex; gap: 15px; align-items: center;">
     `;
 
     if (token) {
-        // Додаємо нові пункти безпосередньо в список <ul>
         navContent += `
-                <a href="my_films.html" style="color: white; text-decoration: none;">My Collection</a>
-                <a href="profile.html" style="color: white; text-decoration: none;">Friends</a>
-
-                <div class="user-menu" style="display: flex; align-items: center; gap: 10px;">
-                    <span style="font-weight: 600; color: white;">${username}</span>
-                    <div class="user-avatar-circle" style="width: 36px; height: 36px; background: var(--accent-pink); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                <li><a href="search_friends.html">Search Friends</a></li>
+                <li><a href="my_films.html">My Collection</a></li>
+                <li><a href="profile.html" style="color: var(--accent-pink);">Friends</a></li>
+                <li><a href="choose.html">Choose</a></li>
+            </ul>
+            <div class="auth-lang" id="nav-right">
+                <div class="user-menu">
+                    <span>${username}</span>
+                    <div class="user-avatar-circle">
                         ${username.charAt(0).toUpperCase()}
                     </div>
                 </div>
-                <a href="#" onclick="logout()" style="color: var(--accent-pink); text-decoration: none; font-weight: bold; margin-left: 10px;">Log Out</a>
+                <a href="#" onclick="logout()" class="logout-link">Log Out</a>
         `;
     } else {
         navContent += `
             </ul>
-            <div class="auth-lang" id="nav-right" style="display: flex; gap: 15px; align-items: center;">
-                <a href="login.html" style="color: white; text-decoration: none;">Log In</a>
-                <a href="signup.html" style="color: var(--accent-pink); text-decoration: none; font-weight: bold;">Sign Up</a>
+            <div class="auth-lang" id="nav-right">
+                <a href="login.html" class="login-link">Log In</a>
+                <a href="signup.html" class="signup-btn">Sign Up</a>
         `;
     }
 
-    navContent += `
-            </div>
-        </nav>
-    `;
+    navContent += `</div></nav>`;
 
     const currentPage = window.location.pathname.split('/').pop();
     if (currentPage === 'index.html' || currentPage === '') {
         navContent += `
             <nav class="sub-nav">
-                <a href="choose.html" class="active-sub">Movies</a>
+                <a href="index.html" class="active-sub" onclick="goToChoose()">Movies</a>
                 <a href="development.html">Books</a>
                 <a href="development.html">Cartoons</a>
                 <a href="development.html">Audiobooks</a>
@@ -65,15 +61,5 @@ function renderHeader() {
     }
 
     header.innerHTML = navContent;
-
     document.body.prepend(header);
 }
-
-function logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('userId');
-    localStorage.removeItem('username');
-    window.location.href = 'index.html';
-}
-
-document.addEventListener('DOMContentLoaded', renderHeader);
