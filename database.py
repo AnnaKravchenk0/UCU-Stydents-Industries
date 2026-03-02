@@ -3,7 +3,10 @@ from sqlalchemy.orm import DeclarativeBase
 
 from config import settings
 
-DATABASE_URL = settings.database_url.get_secret_value() or 'sqlite+aiosqlite:///./blog.db'
+if settings.database_url:
+    DATABASE_URL = settings.database_url.get_secret_value()
+else:
+    DATABASE_URL = 'sqlite+aiosqlite:///./blog.db'
 
 connect_args = {"check_same_thread": False} if "sqlite" in DATABASE_URL else {}
 
