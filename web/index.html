@@ -133,38 +133,38 @@
         // ─────────────────────────────────────────────────────
         // 1. Навігація — перевіряємо токен
         // ─────────────────────────────────────────────────────
-        function renderNav() {
-            const token    = localStorage.getItem('token');
-            const username = localStorage.getItem('username');
-            const navRight = document.getElementById('nav-right');
+        // function renderNav() {
+        //     const token    = localStorage.getItem('token');
+        //     const username = localStorage.getItem('username');
+        //     const navRight = document.getElementById('nav-right');
 
-            if (token && username) {
-                // Залогінений — показуємо кружечок з іменем
-                navRight.innerHTML = `
-                    <a href="my_films.html" class="user-menu">
-                        <span class="user-name">${username}</span>
-                        <div class="user-avatar-circle">
-                            ${username.charAt(0).toUpperCase()}
-                        </div>
-                    </a>
-                    <a href="#" onclick="logout()" class="auth-link"
-                       style="margin-left:15px; color:var(--text-sec); font-size:0.85rem;">
-                        Log out
-                    </a>`;
-            } else {
-                // Не залогінений — кнопки Sign Up / Log In
-                navRight.innerHTML = `
-                    <a href="signup.html" class="auth-link" style="color:var(--accent-pink) !important;">Sign Up</a>
-                    <a href="login.html"  class="auth-link">Log In</a>`;
-            }
-        }
+        //     if (token && username) {
+        //         // Залогінений — показуємо кружечок з іменем
+        //         navRight.innerHTML = `
+        //             <a href="my_films.html" class="user-menu">
+        //                 <span class="user-name">${username}</span>
+        //                 <div class="user-avatar-circle">
+        //                     ${username.charAt(0).toUpperCase()}
+        //                 </div>
+        //             </a>
+        //             <a href="#" onclick="logout()" class="auth-link"
+        //                style="margin-left:15px; color:var(--text-sec); font-size:0.85rem;">
+        //                 Log out
+        //             </a>`;
+        //     } else {
+        //         // Не залогінений — кнопки Sign Up / Log In
+        //         navRight.innerHTML = `
+        //             <a href="signup.html" class="auth-link" style="color:var(--accent-pink) !important;">Sign Up</a>
+        //             <a href="login.html"  class="auth-link">Log In</a>`;
+        //     }
+        // }
 
-        function logout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('username');
-            localStorage.removeItem('userId');
-            location.reload();
-        }
+        // function logout() {
+        //     localStorage.removeItem('token');
+        //     localStorage.removeItem('username');
+        //     localStorage.removeItem('userId');
+        //     location.reload();
+        // }
 
         // ─────────────────────────────────────────────────────
         // 2. Скелетон-заглушки (показуємо поки вантажиться)
@@ -272,9 +272,10 @@
         // ─────────────────────────────────────────────────────
         // Старт
         // ─────────────────────────────────────────────────────
-        renderNav();
+        // renderNav();
         renderContacts();
         fetchMovies();
     </script>
+    <script src="header.js"></script>
 </body>
 </html>
