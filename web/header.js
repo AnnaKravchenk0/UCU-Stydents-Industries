@@ -1,8 +1,6 @@
 function renderHeader() {
     const existingHeader = document.querySelector('header');
-    if (existingHeader) {
-        existingHeader.remove();
-    }
+    if (existingHeader) existingHeader.remove();
 
     const header = document.createElement('header');
     const token = localStorage.getItem('token');
@@ -15,66 +13,34 @@ function renderHeader() {
                 <li><a href="index.html#popular">Popular</a></li>
                 <li><a href="index.html#about">About</a></li>
                 <li><a href="index.html#contacts">Contacts</a></li>
-            </ul>
-            <div class="auth-lang" id="nav-right" style="display: flex; gap: 15px; align-items: center;">
     `;
 
     if (token) {
+        // Додаємо ВСІ кнопки всередину li
         navContent += `
-                <a href="choose.html" style="color: white; text-decoration: none;">Choose</a>
-                <a href="my_films.html" style="color: white; text-decoration: none;">My Collection</a>
-                <a href="profile.html" style="color: white; text-decoration: none;">Friends</a>
-                <a href="search_friends.html" style="color: white; text-decoration: none;">Find Friends</a>
-
-                <div class="user-menu" style="display: flex; align-items: center; gap: 10px;">
-                    <span style="font-weight: 600; color: white;">${username}</span>
-                    <div class="user-avatar-circle" style="width: 36px; height: 36px; background: var(--accent-pink); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
-                        ${username.charAt(0).toUpperCase()}
-                    </div>
+                <li><a href="search_friends.html">Search Friends</a></li>
+                <li><a href="my_films.html">My Collection</a></li>
+                <li><a href="profile.html" class="friends-link" style="color: var(--accent-pink);">Friends</a></li>
+                <li><a href="choose.html">Choose</a></li>
+            </ul> <div class="auth-lang" id="nav-right">
+                <div class="user-menu">
+                    <span>${username}</span>
+                    <div class="user-avatar-circle">${username.charAt(0).toUpperCase()}</div>
                 </div>
-
-                <a href="#" onclick="logout()" style="color: var(--accent-pink); text-decoration: none; font-weight: bold; margin-left: 10px; transition: 0.3s;">Log Out</a>
+                <a href="#" onclick="logout()" class="logout-link">Log Out</a>
         `;
     } else {
         navContent += `
-                <a href="login.html" style="color: white; text-decoration: none; font-weight: 500; transition: 0.3s;">Log In</a>
-                <a href="signup.html" style="color: var(--accent-pink); text-decoration: none; font-weight: bold; transition: 0.3s;">Sign Up</a>
+            </ul>
+            <div class="auth-lang" id="nav-right">
+                <a href="login.html" class="login-link">Log In</a>
+                <a href="signup.html" class="signup-btn">Sign Up</a>
         `;
     }
 
-    navContent += `
-            </div>
-        </nav>
-    `;
-
-    const currentPage = window.location.pathname.split('/').pop();
-    if (currentPage === 'index.html' || currentPage === '') {
-        navContent += `
-            <nav class="sub-nav">
-                <a href="index.html" class="active-sub" onclick="goToChoose()">Movies</a>
-                <a href="development.html">Books</a>
-                <a href="development.html">Cartoons</a>
-                <a href="development.html">Audiobooks</a>
-                <a href="development.html">Podcasts</a>
-                <a href="development.html">Playlists</a>
-                <a href="development.html">Show</a>
-                <a href="development.html">TV shows</a>
-            </nav>
-        `;
-    }
-
+    navContent += `</div></nav>`;
     header.innerHTML = navContent;
-
     document.body.prepend(header);
-}
-
-function goToChoose() {
-    const token = localStorage.getItem('token');
-    if (token) {
-        window.location.href = 'choose.html';
-    } else {
-        window.location.href = 'login.html';
-    }
 }
 
 function logout() {
