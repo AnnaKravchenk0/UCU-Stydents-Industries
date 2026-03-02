@@ -88,7 +88,7 @@ header {
     color: white !important;
 }
 
-/* --- ВАШЕ ДРУГЕ МЕНЮ (SUB-NAV) --- */
+/* --- ДРУГЕ МЕНЮ (SUB-NAV) --- */
 .sub-nav {
     display: flex;
     justify-content: center;
@@ -99,7 +99,7 @@ header {
 }
 
 .sub-nav a {
-    color: var(--text-sec);
+    color: rgba(255, 255, 255, 0.4);
     text-decoration: none;
     font-size: 0.9rem;
     text-transform: uppercase;
@@ -107,14 +107,13 @@ header {
     transition: 0.3s;
 }
 
-.sub-nav a:hover {
-    color: var(--accent-pink);
+.sub-nav a.active-sub {
+    color: var(--text-sec);
 }
 
-
-.sub-nav a.active-sub {
-    color: var(--text-main);
-    font-weight: 600; /* Додає трохи жирності, щоб ще краще виділити (за бажанням) */
+.sub-nav a:hover,
+.sub-nav a.active-sub:hover {
+    color: var(--accent-pink);
 }
 
 /* --- HERO --- */
