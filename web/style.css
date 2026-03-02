@@ -111,6 +111,12 @@ header {
     color: var(--accent-pink);
 }
 
+
+.sub-nav a.active-sub {
+    color: var(--text-main);
+    font-weight: 600; /* Додає трохи жирності, щоб ще краще виділити (за бажанням) */
+}
+
 /* --- HERO --- */
 .hero {
     text-align: center;
