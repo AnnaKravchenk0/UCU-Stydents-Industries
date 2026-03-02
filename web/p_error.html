@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MovieMatch - Server Error</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Основний контейнер помилки */
         .error-container {
             display: flex;
             flex-direction: column;
@@ -62,7 +61,6 @@
             transform: translateY(-3px);
         }
 
-        /* Анімація інструментів */
         .tools-animation {
             margin-top: 50px;
             display: flex;
@@ -94,6 +92,17 @@
             75% { transform: translateY(10px) rotate(-10deg); }
             100% { transform: translateY(0) rotate(0deg); }
         }
+
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            .error-box { padding: 40px 20px; }
+            .error-title { font-size: 2rem; }
+        }
+        @media (max-width: 480px) {
+            .error-box { padding: 30px 15px; }
+            .error-title { font-size: 1.8rem; }
+            .reload-btn { padding: 12px 30px; }
+        }
     </style>
 </head>
 <body>
@@ -103,14 +112,13 @@
             <p class="error-message">
                 Unfortunately, the MovieMatch server is not responding right now. Our tools are already working on a fix!
                 <br><br>Please try reloading the page.
-
             </p>
             <h3>
                 <a href="index.html" class="reload-btn">Reload</a>
             </h3>
-
             <div class="tools-animation">
-                <span class="tool">🔧</span> <span class="tool">⚙️</span> <span class="tool">🛠️</span> </div>
+                <span class="tool">🔧</span> <span class="tool">⚙️</span> <span class="tool">🛠️</span>
+            </div>
         </div>
     </div>
     <script src="header.js"></script>

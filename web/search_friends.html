@@ -6,7 +6,7 @@
     <title>MovieMatch - Search Friends</title>
     <link rel="stylesheet" href="style.css">
     <style>
-            .search-container {
+        .search-container {
             max-width: 800px;
             margin: 50px auto;
             padding: 20px;
@@ -48,10 +48,37 @@
             gap: 15px;
             transition: 0.3s;
             border: 1px solid rgba(255,255,255,0.05);
+            overflow: hidden;
         }
-        .user-card:hover { transform:translateY(-3px); border-color:var(--accent-pink); }
+        .user-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent-pink);
+        }
 
-        .user-avatar { width:50px; height:50px; background:var(--accent-pink); border-radius:50%; flex-shrink:0; }
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            background: var(--accent-pink);
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-name {
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-id {
+            font-size: 0.8rem;
+            color: var(--text-sec);
+        }
 
         .btn-add {
             margin-left: auto;
@@ -63,27 +90,134 @@
             cursor: pointer;
             transition: 0.3s;
             white-space: nowrap;
+            flex-shrink: 0;
         }
-        .btn-add:hover:not(:disabled)  { background: var(--accent-pink); }
-        .btn-add:disabled { opacity:0.5; cursor:default; }
+        .btn-add:hover:not(:disabled) {
+            background: var(--accent-pink);
+        }
+        .btn-add:disabled {
+            opacity: 0.5;
+            cursor: default;
+        }
 
-        .status-msg { color:var(--text-sec); text-align:center; padding:20px 0; }
+        .status-msg {
+            color: var(--text-sec);
+            text-align: center;
+            padding: 20px 0;
+        }
     </style>
 </head>
 <body>
+    <!-- Header буде вставлено через header.js -->
 
     <div class="search-container">
         <h1 style="margin-bottom:25px;">Find New Friends</h1>
 
         <div class="search-box">
-            <input type="text" id="searchInput" class="search-input" placeholder="Enter nickname...">
-            <button onclick="performSearch()" class="btn-choose" style="padding:10px 30px;">Search</button>
+            <input
+                type="text"
+                id="searchInput"
+                class="search-input"
+                placeholder="Enter nickname..."
+            >
+            <button onclick="performSearch()" class="btn-choose" style="padding:10px 30px;">
+                Search
+            </button>
         </div>
 
         <div id="results"></div>
     </div>
 
-
     <script src="header.js"></script>
+    <script>
+        const BASE_URL = 'http://127.0.0.1:8000';
+
+        async function performSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            const resultsDiv = document.getElementById('results');
+
+            if (!query) return;
+
+            resultsDiv.innerHTML = '<p class="status-msg">Searching...</p>';
+
+            try {
+                const response = await fetch(
+                    `${BASE_URL}/users/search?query=${encodeURIComponent(query)}`
+                );
+
+                if (!response.ok) {
+                    window.location.href = 'p_error.html';
+                    return;
+                }
+
+                const users = await response.json();
+
+                if (!users.length) {
+                    resultsDiv.innerHTML = '<p class="status-msg">No users found.</p>';
+                    return;
+                }
+
+                resultsDiv.innerHTML = '';
+                const grid = document.createElement('div');
+                grid.className = 'results-grid';
+
+                users.forEach(user => {
+                    const card = document.createElement('div');
+                    card.className = 'user-card';
+                    card.innerHTML = `
+                        <div class="user-avatar"></div>
+                        <div class="user-info">
+                            <div class="user-name" title="${user.username}">${user.username}</div>
+                            <div class="user-id">ID: ${user.id}</div>
+                        </div>
+                        <button class="btn-add" id="btn-${user.id}" onclick="addFriend(${user.id})">
+                            Add
+                        </button>`;
+                    grid.appendChild(card);
+                });
+
+                resultsDiv.appendChild(grid);
+
+            } catch (error) {
+                console.error('Search error:', error);
+                window.location.href = 'p_error.html';
+            }
+        }
+
+        async function addFriend(friendId) {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('Please log in first!');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const btn = document.getElementById(`btn-${friendId}`);
+            btn.disabled = true;
+            btn.textContent = 'Sending...';
+
+            try {
+                const resp = await fetch(`${BASE_URL}/users/friends/request/${friendId}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!resp.ok) {
+                    window.location.href = 'p_error.html';
+                    return;
+                }
+
+                btn.textContent = 'Sent ✓';
+
+            } catch (e) {
+                console.error('Add friend error:', e);
+                window.location.href = 'p_error.html';
+            }
+        }
+
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') performSearch();
+        });
+    </script>
 </body>
 </html>

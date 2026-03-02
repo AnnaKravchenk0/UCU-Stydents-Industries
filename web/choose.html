@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MovieMatch - Choose Movie</title>
+    <title>MovieMatch - Random Movies</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Additional styles specific to choose.html */
         .choose-wrapper {
             display: flex;
             justify-content: center;
@@ -203,41 +202,52 @@
         .toast.show  { opacity: 1; transform: translateX(-50%) translateY(0); }
         .toast.error { background: #e74c3c; }
 
-        /* Search controls */
-        .search-controls {
+        /* Genre filter */
+        .genre-filter {
             position: absolute;
-            top: 100px;
-            left: 0;
-            right: 0;
-            z-index: 10;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
             display: flex;
             gap: 10px;
-            justify-content: center;
-            flex-wrap: wrap;
-            padding: 0 20px;
+            background: rgba(36, 30, 56, 0.9);
+            padding: 10px 20px;
+            border-radius: 40px;
+            border: 1px solid rgba(184, 59, 136, 0.4);
+            backdrop-filter: blur(10px);
         }
-        .search-controls input,
-        .search-controls select {
-            padding: 10px 15px;
+        .genre-filter select {
+            padding: 8px 15px;
             border-radius: 30px;
             border: none;
             background: #2a2440;
             color: white;
-            width: 250px;
-            font-size: 1rem;
+            font-size: 0.95rem;
+            outline: none;
+            cursor: pointer;
         }
-        .search-controls button {
-            padding: 10px 25px;
+        .genre-filter button {
+            padding: 8px 20px;
+            border-radius: 30px;
+            border: none;
+            background: var(--accent-pink);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .genre-filter button:hover {
+            background: var(--accent-hover);
         }
 
-        /* Mobile adjustments */
+        /* Mobile adaptation */
         @media (max-width: 768px) {
             .movie-card-big {
                 flex-direction: column;
                 width: 95%;
                 padding: 20px;
                 min-height: auto;
-                margin-top: 100px;
             }
             .col-side, .col-center {
                 width: 100%;
@@ -257,10 +267,11 @@
                 font-size: 1.8rem;
                 top: 20px;
             }
-            .search-controls input,
-            .search-controls select {
-                width: 100%;
-                max-width: 300px;
+            .genre-filter {
+                top: -50px;
+                flex-wrap: wrap;
+                justify-content: center;
+                width: 90%;
             }
         }
         @media (max-width: 480px) {
@@ -283,38 +294,37 @@
     </style>
 </head>
 <body>
-    <!-- Header буде вставлено через header.js -->
+    <!-- Header will be inserted by header.js -->
 
     <div class="choose-wrapper">
-        <!-- Панель пошуку над карткою -->
-        <div class="search-controls">
-            <input type="text" id="search-name" placeholder="Movie's name">
-            <select id="genre-select">
-                <option value="">All genres</option>
-                <option value="28">Action</option>
-                <option value="12">Adventure</option>
-                <option value="16">Animation</option>
-                <option value="35">Comedy</option>
-                <option value="80">Crime</option>
-                <option value="99">Documentary</option>
-                <option value="18">Drama</option>
-                <option value="10751">Family</option>
-                <option value="14">Fantasy</option>
-                <option value="36">History</option>
-                <option value="27">Horror</option>
-                <option value="10402">Music</option>
-                <option value="9648">Mystery</option>
-                <option value="10749">Romance</option>
-                <option value="878">Science Fiction</option>
-                <option value="10770">TV Movie</option>
-                <option value="53">Thriller</option>
-                <option value="10752">War</option>
-                <option value="37">Western</option>
-            </select>
-            <button onclick="searchMovies()" class="btn-choose">Search</button>
-        </div>
-
         <div class="movie-card-big" id="main-card">
+            <!-- Genre filter -->
+            <div class="genre-filter">
+                <select id="genre-select">
+                    <option value="">All genres</option>
+                    <option value="28">Action</option>
+                    <option value="12">Adventure</option>
+                    <option value="16">Animation</option>
+                    <option value="35">Comedy</option>
+                    <option value="80">Crime</option>
+                    <option value="99">Documentary</option>
+                    <option value="18">Drama</option>
+                    <option value="10751">Family</option>
+                    <option value="14">Fantasy</option>
+                    <option value="36">History</option>
+                    <option value="27">Horror</option>
+                    <option value="10402">Music</option>
+                    <option value="9648">Mystery</option>
+                    <option value="10749">Romance</option>
+                    <option value="878">Science Fiction</option>
+                    <option value="10770">TV Movie</option>
+                    <option value="53">Thriller</option>
+                    <option value="10752">War</option>
+                    <option value="37">Western</option>
+                </select>
+                <button onclick="applyGenreFilter()">Apply</button>
+            </div>
+
             <div class="swipe-label label-like">LIKE</div>
             <div class="swipe-label label-dislike">NOPE</div>
             <div class="counter" id="counter"></div>
@@ -369,6 +379,7 @@
         let currentPage = 1;
         let totalPages  = 1;
         let isLoading   = false;
+        let currentGenre = '';
 
         const token    = localStorage.getItem('token');
         const username = localStorage.getItem('username');
@@ -385,16 +396,18 @@
             return arr;
         }
 
-        async function fetchMovies(params = {}) {
+        async function fetchMovies(page = 1, genre = '') {
             if (isLoading) return;
             isLoading = true;
 
             try {
-                const queryParams = new URLSearchParams();
-                if (params.name) queryParams.append('name', params.name);
-                if (params.genre) queryParams.append('genre', params.genre);
-                if (params.page) queryParams.append('page', params.page);
-                const url = `${BASE_URL}/movies/${queryParams.toString() ? '?' + queryParams : ''}`;
+                let url = `${BASE_URL}/movies/?page=${page}`;
+                if (genre) {
+                    url += `&genre=${genre}`;
+                } else {
+                    const randomPage = Math.floor(Math.random() * 50) + 1;
+                    url = `${BASE_URL}/movies/?page=${randomPage}`;
+                }
 
                 const res = await fetch(url);
                 const data = await res.json();
@@ -408,14 +421,14 @@
                     return;
                 }
 
-                if (params.page === 1) {
+                if (page === 1) {
                     movies = newMovies;
                 } else {
                     movies = [...movies, ...newMovies];
                 }
                 isLoading = false;
 
-                if (params.page === 1) {
+                if (page === 1) {
                     index = 0;
                     renderMovie();
                 }
@@ -425,20 +438,21 @@
             }
         }
 
-        function searchMovies() {
-            const name = document.getElementById('search-name').value.trim();
+        function applyGenreFilter() {
             const genre = document.getElementById('genre-select').value;
-            fetchMovies({ name, genre, page: 1 });
+            currentGenre = genre;
+            currentPage = 1;
+            fetchMovies(1, genre);
         }
 
-        fetchMovies({ page: 1 });
+        fetchMovies(1);
 
         function renderMovie() {
             const card = document.getElementById('main-card');
 
             if (index >= movies.length - 3 && !isLoading) {
-                currentPage = Math.floor(Math.random() * 50) + 1;
-                fetchMovies({ page: currentPage });
+                currentPage++;
+                fetchMovies(currentPage, currentGenre);
             }
 
             if (index >= movies.length) {
@@ -461,10 +475,11 @@
 
             const img = document.getElementById('movie-img');
             if (m.poster_url) {
-                img.src = m.poster_url;
+                img.src = m.poster_url + '?cb=' + new Date().getTime();
                 img.alt = m.title || '';
                 img.style.display = 'block';
             } else {
+                img.src = '';
                 img.style.display = 'none';
             }
 
