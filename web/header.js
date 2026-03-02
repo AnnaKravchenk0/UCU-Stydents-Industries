@@ -31,12 +31,12 @@ function renderHeader() {
                     </div>
                 </div>
 
-                <a href="#" onclick="logout()" class="auth-link" style="color: var(--text-sec); text-decoration: none; font-size: 0.85rem;">Log out</a>
+                <a href="#" onclick="logout()" style="color: var(--accent-pink); text-decoration: none; font-weight: bold; margin-left: 10px; transition: 0.3s;">Log Out</a>
         `;
     } else {
         navContent += `
-                <a href="login.html" style="color: white; text-decoration: none; font-weight: 500;">Log In</a>
-                <a href="signup.html" style="background-color: var(--accent-pink); color: white; text-decoration: none; padding: 8px 20px; border-radius: 20px; font-weight: bold;">Sign Up</a>
+                <a href="login.html" style="color: white; text-decoration: none; font-weight: 500; transition: 0.3s;">Log In</a>
+                <a href="signup.html" style="color: var(--accent-pink); text-decoration: none; font-weight: bold; transition: 0.3s;">Sign Up</a>
         `;
     }
 
