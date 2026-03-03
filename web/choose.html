@@ -14,6 +14,49 @@
             perspective: 1500px;
             overflow: hidden;
             padding: 20px;
+            position: relative;
+        }
+
+        /* Фіксований фільтр жанрів – завжди нижче хедера */
+        .genre-filter {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 999;
+            display: flex;
+            gap: 10px;
+            background: rgba(36, 30, 56, 0.9);
+            padding: 10px 20px;
+            border-radius: 40px;
+            border: 1px solid rgba(184, 59, 136, 0.4);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .genre-filter select {
+            padding: 8px 15px;
+            border-radius: 30px;
+            border: none;
+            background: #2a2440;
+            color: white;
+            font-size: 0.95rem;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .genre-filter button {
+            padding: 8px 20px;
+            border-radius: 30px;
+            border: none;
+            background: var(--accent-pink);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .genre-filter button:hover {
+            background: var(--accent-hover);
         }
 
         .movie-card-big {
@@ -30,6 +73,7 @@
             transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s;
             box-shadow: 0 30px 60px rgba(0,0,0,0.6);
             position: relative;
+            margin-top: 80px;
         }
 
         .movie-card-big.finished {
@@ -173,16 +217,6 @@
         }
         .auth-hint a { color: var(--accent-pink); text-decoration: none; }
 
-        .counter {
-            position: absolute;
-            top: -38px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: var(--text-sec);
-            font-size: 0.85rem;
-            white-space: nowrap;
-        }
-
         .toast {
             position: fixed;
             bottom: 40px;
@@ -202,52 +236,20 @@
         .toast.show  { opacity: 1; transform: translateX(-50%) translateY(0); }
         .toast.error { background: #e74c3c; }
 
-        /* Genre filter */
-        .genre-filter {
-            position: absolute;
-            top: -60px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 20;
-            display: flex;
-            gap: 10px;
-            background: rgba(36, 30, 56, 0.9);
-            padding: 10px 20px;
-            border-radius: 40px;
-            border: 1px solid rgba(184, 59, 136, 0.4);
-            backdrop-filter: blur(10px);
-        }
-        .genre-filter select {
-            padding: 8px 15px;
-            border-radius: 30px;
-            border: none;
-            background: #2a2440;
-            color: white;
-            font-size: 0.95rem;
-            outline: none;
-            cursor: pointer;
-        }
-        .genre-filter button {
-            padding: 8px 20px;
-            border-radius: 30px;
-            border: none;
-            background: var(--accent-pink);
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .genre-filter button:hover {
-            background: var(--accent-hover);
-        }
-
         /* Mobile adaptation */
         @media (max-width: 768px) {
+            .genre-filter {
+                top: 70px;
+                flex-wrap: wrap;
+                width: 90%;
+                justify-content: center;
+            }
             .movie-card-big {
                 flex-direction: column;
                 width: 95%;
                 padding: 20px;
                 min-height: auto;
+                margin-top: 120px;
             }
             .col-side, .col-center {
                 width: 100%;
@@ -267,16 +269,11 @@
                 font-size: 1.8rem;
                 top: 20px;
             }
-            .genre-filter {
-                top: -50px;
-                flex-wrap: wrap;
-                justify-content: center;
-                width: 90%;
-            }
         }
         @media (max-width: 480px) {
             .movie-card-big {
                 padding: 15px;
+                margin-top: 140px;
             }
             .movie-meta {
                 font-size: 0.8rem;
@@ -286,48 +283,43 @@
                 height: 50px;
                 font-size: 20px;
             }
-            .counter {
-                top: -30px;
-                font-size: 0.7rem;
-            }
         }
     </style>
 </head>
 <body>
-    <!-- Header will be inserted by header.js -->
+    <!-- Header буде вставлено через header.js -->
 
     <div class="choose-wrapper">
-        <div class="movie-card-big" id="main-card">
-            <!-- Genre filter -->
-            <div class="genre-filter">
-                <select id="genre-select">
-                    <option value="">All genres</option>
-                    <option value="28">Action</option>
-                    <option value="12">Adventure</option>
-                    <option value="16">Animation</option>
-                    <option value="35">Comedy</option>
-                    <option value="80">Crime</option>
-                    <option value="99">Documentary</option>
-                    <option value="18">Drama</option>
-                    <option value="10751">Family</option>
-                    <option value="14">Fantasy</option>
-                    <option value="36">History</option>
-                    <option value="27">Horror</option>
-                    <option value="10402">Music</option>
-                    <option value="9648">Mystery</option>
-                    <option value="10749">Romance</option>
-                    <option value="878">Science Fiction</option>
-                    <option value="10770">TV Movie</option>
-                    <option value="53">Thriller</option>
-                    <option value="10752">War</option>
-                    <option value="37">Western</option>
-                </select>
-                <button onclick="applyGenreFilter()">Apply</button>
-            </div>
+        <!-- Фільтр жанрів поза карткою -->
+        <div class="genre-filter">
+            <select id="genre-select">
+                <option value="">All genres</option>
+                <option value="28">Action</option>
+                <option value="12">Adventure</option>
+                <option value="16">Animation</option>
+                <option value="35">Comedy</option>
+                <option value="80">Crime</option>
+                <option value="99">Documentary</option>
+                <option value="18">Drama</option>
+                <option value="10751">Family</option>
+                <option value="14">Fantasy</option>
+                <option value="36">History</option>
+                <option value="27">Horror</option>
+                <option value="10402">Music</option>
+                <option value="9648">Mystery</option>
+                <option value="10749">Romance</option>
+                <option value="878">Science Fiction</option>
+                <option value="10770">TV Movie</option>
+                <option value="53">Thriller</option>
+                <option value="10752">War</option>
+                <option value="37">Western</option>
+            </select>
+            <button onclick="applyGenreFilter()">Apply</button>
+        </div>
 
+        <div class="movie-card-big" id="main-card">
             <div class="swipe-label label-like">LIKE</div>
             <div class="swipe-label label-dislike">NOPE</div>
-            <div class="counter" id="counter"></div>
 
             <div class="col-side" id="left-col">
                 <div class="info-label">Overview</div>
@@ -462,14 +454,12 @@
                 document.getElementById('movie-genres').innerHTML  = '';
                 document.getElementById('movie-rating').textContent = '';
                 document.getElementById('movie-date').textContent   = '';
-                document.getElementById('counter').textContent      = '';
                 setTimeout(() => renderMovie(), 500);
                 return;
             }
 
             const m = movies[index];
 
-            document.getElementById('counter').textContent = `Viewed: ${index + 1}`;
             document.getElementById('movie-title').textContent = m.title || m.original_title || 'Unknown';
             document.getElementById('movie-desc').textContent = m.overview || 'No description available.';
 
