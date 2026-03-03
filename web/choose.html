@@ -17,13 +17,12 @@
             position: relative;
         }
 
-        /* Фіксований фільтр жанрів – завжди нижче хедера */
         .genre-filter {
             position: fixed;
-            top: 80px; /* базовий відступ (хедер ~70px) */
+            top: 80px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 999; /* менше ніж у хедера (1000) */
+            z-index: 999;
             display: flex;
             gap: 10px;
             background: rgba(36, 30, 56, 0.9);
@@ -55,6 +54,7 @@
             cursor: pointer;
             transition: 0.3s;
         }
+
         .genre-filter button:hover {
             background: var(--accent-hover);
         }
@@ -73,7 +73,7 @@
             transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s;
             box-shadow: 0 30px 60px rgba(0,0,0,0.6);
             position: relative;
-            margin-top: 80px; /* відступ, щоб не наїжджати на фільтр */
+            margin-top: 80px;
         }
 
         .movie-card-big.finished {
@@ -236,29 +236,25 @@
         .toast.show  { opacity: 1; transform: translateX(-50%) translateY(0); }
         .toast.error { background: #e74c3c; }
 
-        /* Mobile adaptation – збільшені відступи, щоб фільтр не налізав на хедер */
         @media (max-width: 768px) {
             .genre-filter {
-                top: 90px; /* більше місця для хедера, який може стати вищим */
-                flex-wrap: wrap;
-                width: 90%;
-                justify-content: center;
+                top: 70px;
+                padding: 8px 15px;
+                gap: 8px;
+            }
+            .genre-filter select,
+            .genre-filter button {
+                padding: 6px 12px;
+                font-size: 0.85rem;
             }
             .movie-card-big {
-                flex-direction: column;
-                width: 95%;
+                gap: 20px;
                 padding: 20px;
+                margin-top: 70px;
                 min-height: auto;
-                margin-top: 140px; /* збільшено відповідно */
-            }
-            .col-side, .col-center {
-                width: 100%;
             }
             .movie-main-img {
                 max-width: 250px;
-            }
-            .controls {
-                gap: 15px;
             }
             .btn-circle {
                 width: 60px;
@@ -266,25 +262,44 @@
                 font-size: 24px;
             }
             .swipe-label {
-                font-size: 1.8rem;
-                top: 20px;
+                font-size: 2rem;
+                top: 30px;
             }
         }
+
         @media (max-width: 480px) {
             .genre-filter {
-                top: 100px; /* ще більше для дуже маленьких екранів */
+                top: 60px;
+                padding: 6px 12px;
+            }
+            .genre-filter select,
+            .genre-filter button {
+                padding: 4px 8px;
+                font-size: 0.75rem;
             }
             .movie-card-big {
+                gap: 15px;
                 padding: 15px;
-                margin-top: 160px;
+                margin-top: 60px;
             }
-            .movie-meta {
-                font-size: 0.8rem;
+            .movie-main-img {
+                max-width: 180px;
             }
             .btn-circle {
-                width: 50px;
-                height: 50px;
-                font-size: 20px;
+                width: 45px;
+                height: 45px;
+                font-size: 18px;
+            }
+            .swipe-label {
+                font-size: 1.5rem;
+                top: 20px;
+            }
+            .info-label {
+                font-size: 0.7rem;
+            }
+            .genre-tag {
+                font-size: 0.7rem;
+                padding: 2px 8px;
             }
         }
     </style>
@@ -293,7 +308,6 @@
     <!-- Header буде вставлено через header.js -->
 
     <div class="choose-wrapper">
-        <!-- Фільтр жанрів поза карткою -->
         <div class="genre-filter">
             <select id="genre-select">
                 <option value="">All genres</option>

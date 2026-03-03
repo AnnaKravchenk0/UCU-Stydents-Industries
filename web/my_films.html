@@ -25,7 +25,6 @@
         .page-title h1 { font-size:2.5rem; margin-bottom:5px; }
         .page-subtitle { color:var(--text-sec); }
 
-        /* Пошук */
         .search-section {
             margin-bottom: 25px;
             display: flex;
@@ -76,7 +75,6 @@
         .empty-msg { color:var(--text-sec); grid-column:1/-1; text-align:center; padding:60px 0; font-size:1.1rem; }
         .empty-msg a { color:var(--accent-pink); text-decoration:none; }
 
-        /* Пагінація */
         .pagination {
             display: flex;
             align-items: center;
@@ -114,26 +112,44 @@
             text-align: center;
         }
 
-        /* Мобільна адаптація */
+        /* Мобільні стилі */
         @media (max-width: 768px) {
             .page-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
+                flex-direction: row;
+                align-items: center;
+                gap: 10px;
             }
-            .page-title h1 { font-size: 2rem; }
-            .movies-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
-            .movie-poster { height: 220px; }
+            .page-title h1 {
+                font-size: 2rem;
+            }
+            .movies-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            .movie-poster {
+                height: 220px;
+            }
         }
+
         @media (max-width: 480px) {
-            .movies-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
-            .movie-poster { height: 180px; }
+            .page-title h1 {
+                font-size: 1.5rem;
+            }
+            .movies-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            .movie-poster {
+                height: 180px;
+            }
+            .remove-btn {
+                width: 25px;
+                height: 25px;
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
 <body>
     <!-- Header буде додано через header.js -->
-
     <div class="container">
         <div class="page-header">
             <div class="page-title">
@@ -141,15 +157,10 @@
                 <div class="page-subtitle" id="subtitle">Loading...</div>
             </div>
         </div>
-
-        <!-- Пошук -->
         <div class="search-section">
             <input type="text" id="searchMovies" class="search-input" placeholder="🔍 Search in my movies..." oninput="filterMyMovies()">
         </div>
-
         <div class="movies-grid" id="grid"></div>
-
-        <!-- Пагінація -->
         <div class="pagination" id="pagination" style="display:none;">
             <button class="page-btn" id="btn-prev" onclick="changePage(-1)">← Prev</button>
             <span class="page-info" id="page-info">Page 1 / 1</span>
@@ -265,10 +276,9 @@
                 const remaining = document.querySelectorAll('.movie-card').length;
                 document.getElementById('subtitle').textContent =
                     `You have ${remaining} movie${remaining !== 1 ? 's' : ''} in your collection!`;
-                // Також видаляємо з масивів
                 allMovies = allMovies.filter(m => m.id !== movieId);
                 filteredMovies = filteredMovies.filter(m => m.id !== movieId);
-                renderMovies(); // оновлюємо пагінацію
+                renderMovies();
             }, 300);
         }
 

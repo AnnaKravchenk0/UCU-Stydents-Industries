@@ -105,26 +105,91 @@
             text-align: center;
             padding: 20px 0;
         }
+
+        @media (max-width: 768px) {
+            .search-container {
+                margin: 30px auto;
+                padding: 15px;
+            }
+            .search-input {
+                padding: 12px 20px;
+                font-size: 1rem;
+            }
+            .btn-choose {
+                padding: 12px 25px;
+                font-size: 1rem;
+            }
+            .results-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 15px;
+            }
+            .user-card {
+                padding: 15px;
+            }
+            .user-avatar {
+                width: 40px;
+                height: 40px;
+            }
+            .user-name {
+                font-size: 0.9rem;
+            }
+            .btn-add {
+                padding: 4px 12px;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .search-container {
+                margin: 20px auto;
+                padding: 10px;
+            }
+            .search-box {
+                flex-direction: column;
+                gap: 5px;
+            }
+            .search-input {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+            .btn-choose {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+                width: 100%;
+            }
+            .results-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 10px;
+            }
+            .user-card {
+                padding: 12px;
+                gap: 10px;
+            }
+            .user-avatar {
+                width: 35px;
+                height: 35px;
+            }
+            .user-name {
+                font-size: 0.8rem;
+            }
+            .user-id {
+                font-size: 0.7rem;
+            }
+            .btn-add {
+                padding: 3px 8px;
+                font-size: 0.7rem;
+            }
+        }
     </style>
 </head>
 <body>
     <!-- Header буде вставлено через header.js -->
-
     <div class="search-container">
         <h1 style="margin-bottom:25px;">Find New Friends</h1>
-
         <div class="search-box">
-            <input
-                type="text"
-                id="searchInput"
-                class="search-input"
-                placeholder="Enter nickname..."
-            >
-            <button onclick="performSearch()" class="btn-choose" style="padding:10px 30px;">
-                Search
-            </button>
+            <input type="text" id="searchInput" class="search-input" placeholder="Enter nickname...">
+            <button onclick="performSearch()" class="btn-choose" style="padding:10px 30px;">Search</button>
         </div>
-
         <div id="results"></div>
     </div>
 
@@ -135,32 +200,19 @@
         async function performSearch() {
             const query = document.getElementById('searchInput').value.trim();
             const resultsDiv = document.getElementById('results');
-
             if (!query) return;
-
             resultsDiv.innerHTML = '<p class="status-msg">Searching...</p>';
-
             try {
-                const response = await fetch(
-                    `${BASE_URL}/users/search?query=${encodeURIComponent(query)}`
-                );
-
-                if (!response.ok) {
-                    window.location.href = 'p_error.html';
-                    return;
-                }
-
+                const response = await fetch(`${BASE_URL}/users/search?query=${encodeURIComponent(query)}`);
+                if (!response.ok) { window.location.href = 'p_error.html'; return; }
                 const users = await response.json();
-
                 if (!users.length) {
                     resultsDiv.innerHTML = '<p class="status-msg">No users found.</p>';
                     return;
                 }
-
                 resultsDiv.innerHTML = '';
                 const grid = document.createElement('div');
                 grid.className = 'results-grid';
-
                 users.forEach(user => {
                     const card = document.createElement('div');
                     card.className = 'user-card';
@@ -170,14 +222,10 @@
                             <div class="user-name" title="${user.username}">${user.username}</div>
                             <div class="user-id">ID: ${user.id}</div>
                         </div>
-                        <button class="btn-add" id="btn-${user.id}" onclick="addFriend(${user.id})">
-                            Add
-                        </button>`;
+                        <button class="btn-add" id="btn-${user.id}" onclick="addFriend(${user.id})">Add</button>`;
                     grid.appendChild(card);
                 });
-
                 resultsDiv.appendChild(grid);
-
             } catch (error) {
                 console.error('Search error:', error);
                 window.location.href = 'p_error.html';
@@ -191,24 +239,16 @@
                 window.location.href = 'login.html';
                 return;
             }
-
             const btn = document.getElementById(`btn-${friendId}`);
             btn.disabled = true;
             btn.textContent = 'Sending...';
-
             try {
                 const resp = await fetch(`${BASE_URL}/users/friends/request/${friendId}`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-
-                if (!resp.ok) {
-                    window.location.href = 'p_error.html';
-                    return;
-                }
-
+                if (!resp.ok) { window.location.href = 'p_error.html'; return; }
                 btn.textContent = 'Sent ✓';
-
             } catch (e) {
                 console.error('Add friend error:', e);
                 window.location.href = 'p_error.html';

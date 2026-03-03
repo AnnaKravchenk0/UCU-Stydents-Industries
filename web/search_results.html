@@ -227,43 +227,121 @@
         .toast.error { background: #e74c3c; }
 
         @media (max-width: 768px) {
-            .search-header h1 { font-size: 2rem; }
-            .search-box { flex-direction: column; }
-            .search-btn { width: 100%; }
-            .results-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
-            .movie-poster { height: 220px; }
+            .search-page {
+                margin: 30px auto;
+                padding: 0 15px;
+            }
+            .search-header h1 {
+                font-size: 2rem;
+            }
+            .search-header p {
+                font-size: 1rem;
+            }
+            .search-box {
+                flex-direction: row;
+                gap: 8px;
+            }
+            .search-input {
+                padding: 12px 20px;
+                font-size: 1rem;
+            }
+            .search-btn {
+                padding: 12px 25px;
+                font-size: 1rem;
+            }
+            .results-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 20px;
+            }
+            .movie-poster {
+                height: 220px;
+            }
+            .like-btn {
+                width: 35px;
+                height: 35px;
+                font-size: 1rem;
+            }
+            .movie-info h3 {
+                font-size: 0.9rem;
+            }
+            .movie-info p {
+                font-size: 0.7rem;
+            }
+            .movie-rating {
+                font-size: 0.65rem;
+            }
+            .page-btn {
+                padding: 8px 15px;
+                font-size: 0.8rem;
+            }
         }
+
         @media (max-width: 480px) {
-            .results-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
-            .movie-poster { height: 180px; }
+            .search-header h1 {
+                font-size: 1.5rem;
+            }
+            .search-header p {
+                font-size: 0.9rem;
+            }
+            .search-box {
+                flex-direction: column;
+                gap: 5px;
+            }
+            .search-input {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+            .search-btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+                width: 100%;
+            }
+            .results-grid {
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+                gap: 15px;
+            }
+            .movie-poster {
+                height: 180px;
+            }
+            .like-btn {
+                width: 30px;
+                height: 30px;
+                font-size: 0.9rem;
+            }
+            .movie-info h3 {
+                font-size: 0.8rem;
+            }
+            .movie-info p {
+                font-size: 0.65rem;
+            }
+            .movie-rating {
+                font-size: 0.6rem;
+            }
+            .page-btn {
+                padding: 6px 10px;
+                font-size: 0.7rem;
+            }
         }
     </style>
 </head>
 <body>
     <!-- Header will be inserted by header.js -->
-
     <div class="search-page">
         <div class="search-header">
             <h1>🔍 Search Movies</h1>
             <p>Find any movie by title and add to your collection</p>
         </div>
-
         <div class="search-box">
             <input type="text" id="searchQuery" class="search-input" placeholder="Enter movie name..." value="">
             <button class="search-btn" onclick="searchMovies()">Search</button>
         </div>
-
-        <div class="results-grid" id="resultsGrid">
-            <!-- Results will appear here -->
-        </div>
-
+        <div class="results-grid" id="resultsGrid"></div>
         <div class="pagination" id="pagination" style="display:none;">
             <button class="page-btn" id="btn-prev" onclick="changePage(-1)">← Prev</button>
             <span class="page-info" id="page-info">Page 1 / 1</span>
             <button class="page-btn" id="btn-next" onclick="changePage(1)">Next →</button>
         </div>
     </div>
-
     <div class="toast" id="toast"></div>
 
     <script src="header.js"></script>
@@ -281,24 +359,16 @@
                 document.getElementById('resultsGrid').innerHTML = '<div class="empty-msg">Please enter a movie name.</div>';
                 return;
             }
-
             currentQuery = query;
             currentPage = page;
-
             try {
                 const url = `${BASE_URL}/movies/?name=${encodeURIComponent(query)}&page=${page}`;
                 const res = await fetch(url);
-                if (!res.ok) {
-                    window.location.href = 'p_error.html';
-                    return;
-                }
+                if (!res.ok) { window.location.href = 'p_error.html'; return; }
                 const data = await res.json();
-
                 results = data.results || [];
                 totalPages = data.total_pages || 1;
-
                 renderResults();
-
                 document.getElementById('pagination').style.display = totalPages > 1 ? 'flex' : 'none';
             } catch (e) {
                 window.location.href = 'p_error.html';
@@ -308,26 +378,19 @@
         function renderResults() {
             const grid = document.getElementById('resultsGrid');
             const pageInfo = document.getElementById('page-info');
-
             if (!results.length) {
                 grid.innerHTML = '<div class="empty-msg">No movies found.</div>';
                 return;
             }
-
             grid.innerHTML = results.map(m => {
                 const posterUrl = m.poster_url || (m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : '');
                 const year = m.release_date ? m.release_date.split('-')[0] : '';
-                const rating = m.vote_average && m.vote_average > 0
-                    ? `<span class="movie-rating">★ ${m.vote_average.toFixed(1)}</span>`
-                    : '';
-
+                const rating = m.vote_average && m.vote_average > 0 ? `<span class="movie-rating">★ ${m.vote_average.toFixed(1)}</span>` : '';
                 return `
                 <div class="movie-card" id="movie-${m.id}">
                     <div class="movie-poster">
                         ${posterUrl ? `<img src="${posterUrl}" alt="${m.title}">` : ''}
-                        <button class="like-btn" onclick="likeMovie(event, ${m.id}, '${m.title.replace(/'/g, "\\'")}', '${m.poster_path || ''}', '${m.poster_url || ''}', '${m.overview || ''}', '${m.release_date || ''}', ${m.vote_average || 0})">
-                            ❤
-                        </button>
+                        <button class="like-btn" onclick="likeMovie(event, ${m.id}, '${m.title.replace(/'/g, "\\'")}', '${m.poster_path || ''}', '${m.poster_url || ''}', '${m.overview || ''}', '${m.release_date || ''}', ${m.vote_average || 0})">❤</button>
                     </div>
                     <div class="movie-info">
                         <h3 title="${m.title}">${m.title}</h3>
@@ -336,7 +399,6 @@
                     </div>
                 </div>`;
             }).join('');
-
             pageInfo.textContent = `Page ${currentPage} / ${totalPages}`;
             document.getElementById('btn-prev').disabled = currentPage === 1;
             document.getElementById('btn-next').disabled = currentPage === totalPages;
@@ -356,10 +418,8 @@
                 setTimeout(() => window.location.href = 'login.html', 1500);
                 return;
             }
-
             const btn = event.target;
             btn.disabled = true;
-
             try {
                 const resp = await fetch(`${BASE_URL}/movies/like-movie`, {
                     method: 'POST',
@@ -377,7 +437,6 @@
                         vote_average: voteAverage || null
                     })
                 });
-
                 if (!resp.ok) {
                     if (resp.status === 401) {
                         localStorage.removeItem('token');
@@ -389,7 +448,6 @@
                     btn.disabled = false;
                     return;
                 }
-
                 const data = await resp.json();
                 showToast('❤ ' + (data.message || 'Added to favorites'));
                 btn.classList.add('liked');
@@ -410,7 +468,6 @@
         document.getElementById('searchQuery').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') searchMovies();
         });
-
         window.onload = () => {
             document.getElementById('resultsGrid').innerHTML = '<div class="empty-msg">Enter a movie name to start searching.</div>';
         };

@@ -24,7 +24,7 @@ function renderHeader() {
                 <li><a href="profile.html" class="friends-link">Friends</a></li>
             </ul> <div class="auth-lang" id="nav-right">
                 <div class="user-menu">
-                    <span>${username}</span>
+                    <span class="username-display">${username}</span>
                     <div class="user-avatar-circle">${username.charAt(0).toUpperCase()}</div>
                 </div>
                 <a href="#" onclick="logout()" class="logout-link">Log Out</a>
@@ -49,5 +49,29 @@ function logout() {
     localStorage.removeItem('username');
     window.location.href = 'index.html';
 }
+
+// Функція для адаптивного розміру шрифту
+function setResponsiveFontSize() {
+    const width = window.innerWidth;
+    let baseSize = 16;
+
+    if (width <= 360) {
+        baseSize = 11;
+    } else if (width <= 480) {
+        baseSize = 12;
+    } else if (width <= 768) {
+        baseSize = 14;
+    } else if (width <= 1024) {
+        baseSize = 15;
+    } else {
+        baseSize = 16;
+    }
+
+    document.documentElement.style.fontSize = baseSize + 'px';
+}
+
+// Викликаємо при завантаженні та зміні розміру
+window.addEventListener('load', setResponsiveFontSize);
+window.addEventListener('resize', setResponsiveFontSize);
 
 document.addEventListener('DOMContentLoaded', renderHeader);
