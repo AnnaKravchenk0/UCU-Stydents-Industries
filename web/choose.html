@@ -11,10 +11,8 @@
             justify-content: center;
             align-items: center;
             min-height: calc(100vh - 80px);
+            padding: 1rem;
             perspective: 1500px;
-            overflow: hidden;
-            padding: 20px;
-            position: relative;
         }
 
         .genre-filter {
@@ -25,29 +23,28 @@
             z-index: 999;
             display: flex;
             gap: 10px;
-            background: rgba(36, 30, 56, 0.9);
-            padding: 10px 20px;
+            background: rgba(36,30,56,0.9);
+            padding: 0.6rem 1rem;
             border-radius: 40px;
-            border: 1px solid rgba(184, 59, 136, 0.4);
+            border: 1px solid rgba(184,59,136,0.4);
             backdrop-filter: blur(10px);
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
-        .genre-filter select {
-            padding: 8px 15px;
+        .genre-filter select,
+        .genre-filter button {
+            padding: 0.4rem 0.8rem;
             border-radius: 30px;
             border: none;
+            font-size: 0.9rem;
+        }
+
+        .genre-filter select {
             background: #2a2440;
             color: white;
-            font-size: 0.95rem;
-            outline: none;
-            cursor: pointer;
         }
 
         .genre-filter button {
-            padding: 8px 20px;
-            border-radius: 30px;
-            border: none;
             background: var(--accent-pink);
             color: white;
             font-weight: bold;
@@ -61,18 +58,17 @@
 
         .movie-card-big {
             display: flex;
-            gap: 40px;
-            background: rgba(36, 30, 56, 0.85);
+            gap: 2rem;
+            background: rgba(36,30,56,0.85);
             backdrop-filter: blur(25px);
-            padding: 30px;
+            padding: 2rem;
             border-radius: 40px;
-            border: 1px solid rgba(184, 59, 136, 0.4);
-            width: 75%;
-            max-width: 1400px;
-            min-height: 650px;
-            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s;
+            border: 1px solid rgba(184,59,136,0.4);
+            width: 85%;
+            max-width: 1200px;
+            min-height: 500px;
+            transition: transform 0.6s, opacity 0.4s;
             box-shadow: 0 30px 60px rgba(0,0,0,0.6);
-            position: relative;
             margin-top: 80px;
         }
 
@@ -83,41 +79,47 @@
             text-align: center;
         }
 
-        .swipe-like    { transform: translateX(200%) rotate(30deg) !important; opacity: 0 !important; }
-        .swipe-dislike { transform: translateX(-200%) rotate(-30deg) !important; opacity: 0 !important; }
-        .new-card-anim { animation: fadeInScale 0.4s ease-out; }
+        .swipe-like, .swipe-dislike {
+            transition: transform 0.5s, opacity 0.5s;
+        }
+        .swipe-like { transform: translateX(200%) rotate(30deg); opacity: 0; }
+        .swipe-dislike { transform: translateX(-200%) rotate(-30deg); opacity: 0; }
+
+        .new-card-anim {
+            animation: fadeInScale 0.4s ease-out;
+        }
 
         @keyframes fadeInScale {
-            from { opacity: 0; transform: scale(0.92); }
-            to   { opacity: 1; transform: scale(1); }
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
         }
 
         .swipe-label {
             position: absolute;
             top: 40px;
-            font-size: 2.5rem;
+            font-size: 2rem;
             font-weight: 900;
             border: 4px solid;
-            padding: 8px 20px;
+            padding: 0.5rem 1.5rem;
             border-radius: 12px;
             opacity: 0;
             pointer-events: none;
-            z-index: 10;
             transition: opacity 0.15s;
         }
-        .label-like    { left: 40px;  color: #2ecc71; border-color: #2ecc71; transform: rotate(-15deg); }
+        .label-like { left: 40px; color: #2ecc71; border-color: #2ecc71; transform: rotate(-15deg); }
         .label-dislike { right: 40px; color: #e74c3c; border-color: #e74c3c; transform: rotate(15deg); }
-        .show-like    .label-like    { opacity: 1; }
-        .show-dislike .label-dislike { opacity: 1; }
+        .show-like .label-like,
+        .show-dislike .label-dislike {
+            opacity: 1;
+        }
 
         .col-side {
             flex: 1;
-            color: var(--text-sec);
-            font-size: 1rem;
-            line-height: 1.7;
             display: flex;
             flex-direction: column;
             justify-content: center;
+            color: var(--text-sec);
+            line-height: 1.6;
         }
         .col-center {
             flex: 1.2;
@@ -130,206 +132,160 @@
 
         .movie-main-img {
             width: 100%;
-            max-width: 340px;
+            max-width: 300px;
             aspect-ratio: 2/3;
             object-fit: cover;
-            border-radius: 25px;
-            margin-bottom: 20px;
+            border-radius: 20px;
+            margin-bottom: 1rem;
             box-shadow: 0 15px 40px rgba(0,0,0,0.5);
         }
 
         #movie-title {
             font-size: 2rem;
-            margin-bottom: 6px;
+            margin-bottom: 0.3rem;
             color: white;
             font-weight: 800;
         }
 
         .movie-meta {
             color: var(--text-sec);
-            font-size: 0.9rem;
-            margin-bottom: 10px;
+            margin-bottom: 0.5rem;
         }
 
         .controls {
             display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin-top: 15px;
+            gap: 2rem;
+            margin-top: 1rem;
         }
 
         .btn-circle {
-            width: 75px;
-            height: 75px;
+            width: 65px;
+            height: 65px;
             border-radius: 50%;
             border: none;
             cursor: pointer;
-            font-size: 28px;
+            font-size: 1.8rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: 0.3s;
             color: white;
         }
         .btn-dislike { background: #4a4a6a; }
-        .btn-like    { background: var(--accent-pink); }
-        .btn-circle:hover  { transform: scale(1.15); box-shadow: 0 8px 25px rgba(0,0,0,0.4); }
-        .btn-circle:active { transform: scale(0.95); }
+        .btn-like { background: var(--accent-pink); }
+        .btn-circle:hover { transform: scale(1.1); }
 
-        .info-block { margin-bottom: 28px; }
+        .info-block {
+            margin-bottom: 1.5rem;
+        }
         .info-label {
             color: white;
             font-weight: 700;
-            font-size: 0.78rem;
+            font-size: 0.7rem;
             text-transform: uppercase;
             letter-spacing: 1.5px;
-            margin-bottom: 10px;
+            margin-bottom: 0.5rem;
         }
 
         .genre-tag {
             display: inline-block;
-            background: rgba(184, 59, 136, 0.2);
-            border: 1px solid rgba(184, 59, 136, 0.5);
+            background: rgba(184,59,136,0.2);
+            border: 1px solid rgba(184,59,136,0.5);
             color: var(--accent-pink);
-            padding: 4px 12px;
+            padding: 0.2rem 0.8rem;
             border-radius: 20px;
-            font-size: 0.82rem;
-            margin: 3px 3px 3px 0;
+            font-size: 0.8rem;
+            margin: 0.2rem 0.2rem 0 0;
         }
 
         .rating-bar-wrap {
             background: rgba(255,255,255,0.1);
             border-radius: 10px;
             height: 8px;
-            margin-top: 8px;
+            margin-top: 0.5rem;
         }
         .rating-bar-fill {
             height: 8px;
             border-radius: 10px;
             background: linear-gradient(90deg, var(--accent-pink), #ff9a9e);
-            transition: width 0.5s ease;
+            transition: width 0.5s;
         }
 
         .auth-hint {
-            margin-top: 12px;
-            font-size: 0.82rem;
+            margin-top: 1rem;
+            font-size: 0.8rem;
             color: var(--text-sec);
         }
-        .auth-hint a { color: var(--accent-pink); text-decoration: none; }
+        .auth-hint a { color: var(--accent-pink); }
 
         .toast {
             position: fixed;
-            bottom: 40px;
+            bottom: 2rem;
             left: 50%;
             transform: translateX(-50%) translateY(20px);
             background: #2ecc71;
             color: white;
-            padding: 12px 30px;
+            padding: 0.8rem 2rem;
             border-radius: 30px;
             font-weight: 600;
-            font-size: 0.95rem;
             opacity: 0;
-            transition: all 0.3s;
+            transition: 0.3s;
             z-index: 1000;
             pointer-events: none;
         }
-        .toast.show  { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
         .toast.error { background: #e74c3c; }
 
         @media (max-width: 768px) {
             .genre-filter {
                 top: 70px;
-                padding: 8px 15px;
-                gap: 8px;
-            }
-            .genre-filter select,
-            .genre-filter button {
-                padding: 6px 12px;
-                font-size: 0.85rem;
+                padding: 0.4rem 0.8rem;
             }
             .movie-card-big {
-                gap: 20px;
-                padding: 20px;
+                flex-direction: column;
+                gap: 1.5rem;
+                padding: 1.5rem;
                 margin-top: 70px;
-                min-height: auto;
             }
             .movie-main-img {
-                max-width: 250px;
+                max-width: 220px;
             }
             .btn-circle {
-                width: 60px;
-                height: 60px;
-                font-size: 24px;
-            }
-            .swipe-label {
-                font-size: 2rem;
-                top: 30px;
+                width: 55px;
+                height: 55px;
+                font-size: 1.5rem;
             }
         }
 
         @media (max-width: 480px) {
             .genre-filter {
                 top: 60px;
-                padding: 6px 12px;
-            }
-            .genre-filter select,
-            .genre-filter button {
-                padding: 4px 8px;
-                font-size: 0.75rem;
             }
             .movie-card-big {
-                gap: 15px;
-                padding: 15px;
                 margin-top: 60px;
+                padding: 1rem;
             }
             .movie-main-img {
-                max-width: 180px;
+                max-width: 160px;
             }
             .btn-circle {
                 width: 45px;
                 height: 45px;
-                font-size: 18px;
+                font-size: 1.2rem;
             }
             .swipe-label {
                 font-size: 1.5rem;
                 top: 20px;
             }
-            .info-label {
-                font-size: 0.7rem;
-            }
-            .genre-tag {
-                font-size: 0.7rem;
-                padding: 2px 8px;
-            }
         }
     </style>
 </head>
 <body>
-    <!-- Header буде вставлено через header.js -->
-
     <div class="choose-wrapper">
         <div class="genre-filter">
             <select id="genre-select">
                 <option value="">All genres</option>
-                <option value="28">Action</option>
-                <option value="12">Adventure</option>
-                <option value="16">Animation</option>
-                <option value="35">Comedy</option>
-                <option value="80">Crime</option>
-                <option value="99">Documentary</option>
-                <option value="18">Drama</option>
-                <option value="10751">Family</option>
-                <option value="14">Fantasy</option>
-                <option value="36">History</option>
-                <option value="27">Horror</option>
-                <option value="10402">Music</option>
-                <option value="9648">Mystery</option>
-                <option value="10749">Romance</option>
-                <option value="878">Science Fiction</option>
-                <option value="10770">TV Movie</option>
-                <option value="53">Thriller</option>
-                <option value="10752">War</option>
-                <option value="37">Western</option>
+                <!-- опції -->
             </select>
             <button onclick="applyGenreFilter()">Apply</button>
         </div>
@@ -337,25 +293,20 @@
         <div class="movie-card-big" id="main-card">
             <div class="swipe-label label-like">LIKE</div>
             <div class="swipe-label label-dislike">NOPE</div>
-
             <div class="col-side" id="left-col">
                 <div class="info-label">Overview</div>
                 <p id="movie-desc">Loading...</p>
             </div>
-
             <div class="col-center" id="center-col">
                 <img src="" alt="" class="movie-main-img" id="movie-img">
                 <h2 id="movie-title">—</h2>
                 <div class="movie-meta" id="movie-meta"></div>
                 <div class="controls">
-                    <button class="btn-circle btn-dislike" onclick="handleSwipe('dislike')" title="Skip (←)">✖</button>
-                    <button class="btn-circle btn-like"    onclick="handleSwipe('like')"    title="Like (→)">❤</button>
+                    <button class="btn-circle btn-dislike" onclick="handleSwipe('dislike')">✖</button>
+                    <button class="btn-circle btn-like" onclick="handleSwipe('like')">❤</button>
                 </div>
-                <p class="auth-hint" id="auth-hint" style="display:none;">
-                    <a href="login.html">Log in</a> to save liked movies
-                </p>
+                <p class="auth-hint" id="auth-hint" style="display:none;"><a href="login.html">Log in</a> to save liked movies</p>
             </div>
-
             <div class="col-side" id="right-col">
                 <div class="info-block">
                     <div class="info-label">Genres</div>
@@ -363,21 +314,17 @@
                 </div>
                 <div class="info-block">
                     <div class="info-label">Rating</div>
-                    <div id="movie-rating" style="color:white; font-size:1.4rem; font-weight:700;">—</div>
-                    <div class="rating-bar-wrap">
-                        <div class="rating-bar-fill" id="rating-bar" style="width:0%"></div>
-                    </div>
+                    <div id="movie-rating">—</div>
+                    <div class="rating-bar-wrap"><div class="rating-bar-fill" id="rating-bar"></div></div>
                 </div>
                 <div class="info-block">
                     <div class="info-label">Release Date</div>
-                    <div id="movie-date" style="color:white; font-size:1rem;"></div>
+                    <div id="movie-date"></div>
                 </div>
             </div>
         </div>
     </div>
-
     <div class="toast" id="toast"></div>
-
     <script src="header.js"></script>
     <script>
         const BASE_URL = 'http://127.0.0.1:8000';

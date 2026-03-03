@@ -39,8 +39,33 @@ function renderHeader() {
     }
 
     navContent += `</div></nav>`;
-    header.innerHTML = navContent;
+
+    const subNav = `
+        <nav class="sub-nav">
+            <a href="index.html" class="active-sub" onclick="goToChoose()">Movies</a>
+            <a href="development.html">Books</a>
+            <a href="development.html">Cartoons</a>
+            <a href="development.html">Audiobooks</a>
+            <a href="development.html">Podcasts</a>
+            <a href="development.html">Playlists</a>
+            <a href="development.html">Show</a>
+            <a href="development.html">TV shows</a>
+        </nav>
+    `;
+
+    header.innerHTML = navContent + subNav;
     document.body.prepend(header);
+
+    // Позначити активний пункт у підменю
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    document.querySelectorAll('.sub-nav a').forEach(link => {
+        const href = link.getAttribute('href');
+        if (href === currentPage) {
+            link.classList.add('active-sub');
+        } else {
+            link.classList.remove('active-sub');
+        }
+    });
 }
 
 function logout() {
@@ -50,28 +75,22 @@ function logout() {
     window.location.href = 'index.html';
 }
 
-// Функція для адаптивного розміру шрифту
+function goToChoose() {
+    const token = localStorage.getItem('token');
+    if (token) window.location.href = 'choose.html';
+    else window.location.href = 'login.html';
+}
+
 function setResponsiveFontSize() {
     const width = window.innerWidth;
     let baseSize = 16;
-
-    if (width <= 360) {
-        baseSize = 11;
-    } else if (width <= 480) {
-        baseSize = 12;
-    } else if (width <= 768) {
-        baseSize = 14;
-    } else if (width <= 1024) {
-        baseSize = 15;
-    } else {
-        baseSize = 16;
-    }
-
+    if (width <= 360) baseSize = 11;
+    else if (width <= 480) baseSize = 12;
+    else if (width <= 768) baseSize = 14;
+    else if (width <= 1024) baseSize = 15;
     document.documentElement.style.fontSize = baseSize + 'px';
 }
 
-// Викликаємо при завантаженні та зміні розміру
 window.addEventListener('load', setResponsiveFontSize);
 window.addEventListener('resize', setResponsiveFontSize);
-
 document.addEventListener('DOMContentLoaded', renderHeader);
