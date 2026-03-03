@@ -20,10 +20,10 @@
         /* Фіксований фільтр жанрів – завжди нижче хедера */
         .genre-filter {
             position: fixed;
-            top: 80px;
+            top: 80px; /* базовий відступ (хедер ~70px) */
             left: 50%;
             transform: translateX(-50%);
-            z-index: 999;
+            z-index: 999; /* менше ніж у хедера (1000) */
             display: flex;
             gap: 10px;
             background: rgba(36, 30, 56, 0.9);
@@ -73,7 +73,7 @@
             transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s;
             box-shadow: 0 30px 60px rgba(0,0,0,0.6);
             position: relative;
-            margin-top: 80px;
+            margin-top: 80px; /* відступ, щоб не наїжджати на фільтр */
         }
 
         .movie-card-big.finished {
@@ -236,10 +236,10 @@
         .toast.show  { opacity: 1; transform: translateX(-50%) translateY(0); }
         .toast.error { background: #e74c3c; }
 
-        /* Mobile adaptation */
+        /* Mobile adaptation – збільшені відступи, щоб фільтр не налізав на хедер */
         @media (max-width: 768px) {
             .genre-filter {
-                top: 70px;
+                top: 90px; /* більше місця для хедера, який може стати вищим */
                 flex-wrap: wrap;
                 width: 90%;
                 justify-content: center;
@@ -249,7 +249,7 @@
                 width: 95%;
                 padding: 20px;
                 min-height: auto;
-                margin-top: 120px;
+                margin-top: 140px; /* збільшено відповідно */
             }
             .col-side, .col-center {
                 width: 100%;
@@ -271,9 +271,12 @@
             }
         }
         @media (max-width: 480px) {
+            .genre-filter {
+                top: 100px; /* ще більше для дуже маленьких екранів */
+            }
             .movie-card-big {
                 padding: 15px;
-                margin-top: 140px;
+                margin-top: 160px;
             }
             .movie-meta {
                 font-size: 0.8rem;
