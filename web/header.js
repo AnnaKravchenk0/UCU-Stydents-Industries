@@ -20,7 +20,7 @@ function renderHeader() {
         navContent += `
                 <li><a href="search_friends.html">Search Friends</a></li>
                 <li><a href="my_films.html">My Collection</a></li>
-                <li><a href="profile.html" class="friends-link" style="color: var(--accent-pink);">Friends</a></li>
+                <li><a href="profile.html" class="friends-link">Friends</a></li>
                 <li><a href="choose.html">Choose</a></li>
             </ul> <div class="auth-lang" id="nav-right">
                 <div class="user-menu">

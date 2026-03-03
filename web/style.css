@@ -453,3 +453,17 @@ header {
         gap: 10px;
     }
 }
+
+
+/* Стилі для посилань у правій частині (Log In / Sign Up) */
+.auth-lang a {
+    color: var(--text-sec);
+    text-decoration: none;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: color 0.3s;
+}
+
+.auth-lang a:hover {
+    color: var(--accent-pink);
+}
