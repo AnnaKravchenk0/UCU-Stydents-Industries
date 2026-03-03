@@ -13,15 +13,15 @@ function renderHeader() {
                 <li><a href="index.html#popular">Popular</a></li>
                 <li><a href="index.html#about">About</a></li>
                 <li><a href="index.html#contacts">Contacts</a></li>
-                <li><a href="search_results.html">Search Films</a></li>
+                <li><a href="search_results.html">Search Movies</a></li>
     `;
 
     if (token) {
         navContent += `
-                <li><a href="search_friends.html">Search Friends</a></li>
+                <li><a href="choose.html">Choose Movies</a></li>
                 <li><a href="my_films.html">My Collection</a></li>
+                <li><a href="search_friends.html">Search Friends</a></li>
                 <li><a href="profile.html" class="friends-link">Friends</a></li>
-                <li><a href="choose.html">Choose</a></li>
             </ul> <div class="auth-lang" id="nav-right">
                 <div class="user-menu">
                     <span>${username}</span>
