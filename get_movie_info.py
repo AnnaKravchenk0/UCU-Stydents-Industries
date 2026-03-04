@@ -39,52 +39,8 @@ class TMDBClient:
         self.session = requests.Session()
         self.session.params = {'api_key': self.__api_key}
 
-    def get_movies(
-        self,
-        name: Optional[str] = None,
-        year: Optional[int] = None,
-        genre_ids: Optional[List[int]] = None,
-        page: int = 1
-    ) -> Dict[str, Any]:
-        """
-        Отримує фільми з TMDB.
-        - Якщо вказано name – виконує пошук за назвою.
-        - Інакше – використовує discover з фільтрами year та/або genre_ids.
-        """
-        if name:
-            endpoint = f"{self.BASE_URL}/search/movie"
-            params = {'query': name, 'year': year}
-        else:
-            endpoint = f"{self.BASE_URL}/discover/movie"
-            params = {
-                'sort_by': 'popularity.desc',
-                'primary_release_year': year,
-                'with_genres': ','.join(str(g) for g in genre_ids) if genre_ids else None
-            }
-
-        params['page'] = page
-        params = {k: v for k, v in params.items() if v is not None}
-
-        try:
-            response = self.session.get(endpoint, params=params)
-            response.raise_for_status()
-            data = response.json()
-
-            for movie in data.get("results", []):
-                poster = movie.get("poster_path")
-                movie["poster_url"] = (
-                    f"https://image.tmdb.org/t/p/w500{poster}" if poster else None
-                )
-                movie_genres = movie.get('genre_ids', [])
-                movie['genres_str'] = self.convert_gener_id_to_gener_name(movie_genres)
-            return data
-
-        except RequestException as e:
-            print(f"Помилка при запиті до TMDB: {e}")
-            return {"error": str(e), "results": []}
-
     @classmethod
-    def convert_gener_id_to_gener_name(cls, genre_ids: list[int]) -> str | None:
+    def convert_gener_id_to_gener_name(cls, genre_ids: list[int]) -> list | None:
         result = []
         for genre in cls.GENERS_DICT["genres"]:
             if genre['id'] in genre_ids:
@@ -93,4 +49,62 @@ class TMDBClient:
             return result
         return None
 
-client = TMDBClient(api_key=settings.tmdb_api_key.get_secret_value())
+    @classmethod
+    def get_genre_id_by_name(cls, genres):
+        "converts genere to genere id"
+        result = []
+        for genre in cls.GENERS_DICT["genres"]:
+            if genre["name"] in genres:
+                result.append(genre['id'])
+        if result:
+            return result
+        return None
+
+    def get_movies(self, name=None, year=None, genre_ids=None, page=1,):
+        SAFE_LANGUAGES = {
+            'en', 'uk', 'fr', 'de', 'it', 'es', 'pt', 'nl',
+            'ja', 'ko', 'pl', 'cs', 'sv', 'no', 'da', 'fi',
+            'hu', 'ro', 'el', 'bg', 'he', 'th'
+        }
+
+        if name:
+            endpoint = f"{self.BASE_URL}/search/movie"
+            params = {'query': name, 'year': year, 'include_adult': False}
+        elif year or genre_ids:
+            endpoint = f"{self.BASE_URL}/discover/movie"
+            params = {'sort_by': 'popularity.desc', 'include_adult': False}
+            if year:
+                params['primary_release_year'] = year
+            if genre_ids:
+                params['with_genres'] = "|".join([str(g) for g in genre_ids])
+        else:
+            endpoint = f"{self.BASE_URL}/movie/popular"
+            params = {'include_adult': False}
+
+        params['page'] = page
+
+        try:
+            clean_params = {k: v for k, v in params.items() if v is not None}
+            response = self.session.get(endpoint, params=clean_params)
+            response.raise_for_status()
+            data = response.json()
+
+            data["results"] = [
+                movie for movie in data.get("results", [])
+                if movie.get("original_language") in SAFE_LANGUAGES
+                and not movie.get("adult", False)
+            ]
+
+            for movie in data["results"]:
+                poster = movie.get("poster_path")
+                movie["poster_url"] = (
+                    f"https://image.tmdb.org/t/p/w500{poster}" if poster else None
+                )
+                movie['genres_str'] = self.convert_gener_id_to_gener_name(movie['genre_ids'])
+
+            return data
+
+        except RequestException as e:
+            print(f"Помилка при запиті до TMDB: {e}")
+            return {"error": str(e), "results": []}
+client = TMDBClient(api_key = settings.tmdb_api_key.get_secret_value())
