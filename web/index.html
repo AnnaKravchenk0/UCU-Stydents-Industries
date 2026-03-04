@@ -5,6 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MovieMatch - Home</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Додаткові стилі для центрування секції hero */
+        .hero {
+            text-align: center;
+            padding: 2rem 0;
+        }
+        .hero h1 {
+            margin-bottom: 1.5rem;
+        }
+        .btn-choose {
+            display: inline-block;
+        }
+
+        /* Фіксована сітка для популярних фільмів на ПК */
+        @media (min-width: 1024px) {
+            .movie-grid {
+                grid-template-columns: repeat(5, 1fr) !important;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Header додається через header.js -->
@@ -36,7 +56,7 @@
 
     <script src="header.js"></script>
     <script>
-        const BASE_URL = 'https://ucu-stydents-industries.onrender.com';
+        const BASE_URL = 'http://127.0.0.1:8000';
 
         function renderSkeletons(count = 12) {
             const grid = document.getElementById('movie-grid');
@@ -94,13 +114,23 @@
 
         function renderContacts() {
             const names = ["Voskalo Liubomyr", "Anna Kravchenko", "Tymyr Omelyanenko", "Anna Liuklian"];
-            document.getElementById('contacts-grid').innerHTML = names.map(name => `
+            // Приклад посилань на фото (замініть на власні)
+            const imageUrls = [
+                "https://randomuser.me/api/portraits/men/1.jpg",   // для Любомира
+                "https://randomuser.me/api/portraits/women/2.jpg", // для Анни Кравченко
+                "https://randomuser.me/api/portraits/men/3.jpg",   // для Тимура
+                "https://randomuser.me/api/portraits/women/4.jpg"  // для Анни Люклян
+            ];
+
+            document.getElementById('contacts-grid').innerHTML = names.map((name, index) => `
                 <div class="contact-item">
-                    <div class="avatar"></div>
+                    <div class="avatar">
+                        <!-- Змініть src на своє посилання -->
+                        <img src="${imageUrls[index]}" alt="${name}" style="width:100%; height:100%; object-fit: cover; border-radius:50%;">
+                    </div>
                     <div class="contact-card">
                         <h3>${name}</h3>
-                        <p class="phone">+1 234 567 890</p>
-                        <p class="desc">Available 24/7</p>
+                        <!-- Телефон та статус видалено -->
                     </div>
                 </div>`).join('');
         }
