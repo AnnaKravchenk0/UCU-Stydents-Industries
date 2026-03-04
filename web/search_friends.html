@@ -48,10 +48,37 @@
             gap: 15px;
             transition: 0.3s;
             border: 1px solid rgba(255,255,255,0.05);
+            overflow: hidden;
         }
-        .user-card:hover { transform:translateY(-3px); border-color:var(--accent-pink); }
+        .user-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent-pink);
+        }
 
-        .user-avatar { width:50px; height:50px; background:var(--accent-pink); border-radius:50%; flex-shrink:0; }
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            background: var(--accent-pink);
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-name {
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-id {
+            font-size: 0.8rem;
+            color: var(--text-sec);
+        }
 
         .btn-add {
             margin-left: auto;
@@ -63,90 +90,145 @@
             cursor: pointer;
             transition: 0.3s;
             white-space: nowrap;
+            flex-shrink: 0;
         }
-        .btn-add:hover:not(:disabled)  { background: var(--accent-pink); }
-        .btn-add:disabled { opacity:0.5; cursor:default; }
+        .btn-add:hover:not(:disabled) {
+            background: var(--accent-pink);
+        }
+        .btn-add:disabled {
+            opacity: 0.5;
+            cursor: default;
+        }
 
-        .status-msg { color:var(--text-sec); text-align:center; padding:20px 0; }
+        .status-msg {
+            color: var(--text-sec);
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .search-container {
+                margin: 30px auto;
+                padding: 15px;
+            }
+            .search-input {
+                padding: 12px 20px;
+                font-size: 1rem;
+            }
+            .btn-choose {
+                padding: 12px 25px;
+                font-size: 1rem;
+            }
+            .results-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 15px;
+            }
+            .user-card {
+                padding: 15px;
+            }
+            .user-avatar {
+                width: 40px;
+                height: 40px;
+            }
+            .user-name {
+                font-size: 0.9rem;
+            }
+            .btn-add {
+                padding: 4px 12px;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .search-container {
+                margin: 20px auto;
+                padding: 10px;
+            }
+            .search-box {
+                flex-direction: column;
+                gap: 5px;
+            }
+            .search-input {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+            .btn-choose {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+                width: 100%;
+            }
+            .results-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 10px;
+            }
+            .user-card {
+                padding: 12px;
+                gap: 10px;
+            }
+            .user-avatar {
+                width: 35px;
+                height: 35px;
+            }
+            .user-name {
+                font-size: 0.8rem;
+            }
+            .user-id {
+                font-size: 0.7rem;
+            }
+            .btn-add {
+                padding: 3px 8px;
+                font-size: 0.7rem;
+            }
+        }
     </style>
 </head>
 <body>
-    <header>
-        <nav class="top-nav">
-            <a href="index.html" class="logo">MovieMatch</a>
-            <ul class="nav-links">
-                <li><a href="profile.html">Friends</a></li>
-                <li><a href="my_films.html">My Collection</a></li>
-                <li><a href="search_friends.html" style="color:var(--accent-pink);">Search Friends</a></li>
-            </ul>
-        </nav>
-    </header>
-
+    <!-- Header буде вставлено через header.js -->
     <div class="search-container">
         <h1 style="margin-bottom:25px;">Find New Friends</h1>
-
         <div class="search-box">
-            <input
-                type="text"
-                id="searchInput"
-                class="search-input"
-                placeholder="Enter nickname..."
-            >
-            <button onclick="performSearch()" class="btn-choose" style="padding:10px 30px;">
-                Search
-            </button>
+            <input type="text" id="searchInput" class="search-input" placeholder="Enter nickname...">
+            <button onclick="performSearch()" class="btn-choose" style="padding:10px 30px;">Search</button>
         </div>
-
         <div id="results"></div>
     </div>
 
+    <script src="header.js"></script>
     <script>
         const BASE_URL = 'https://ucu-stydents-industries.onrender.com';
 
         async function performSearch() {
             const query = document.getElementById('searchInput').value.trim();
             const resultsDiv = document.getElementById('results');
-
             if (!query) return;
-
             resultsDiv.innerHTML = '<p class="status-msg">Searching...</p>';
-
             try {
-                // GET /users/search?query=... — пошук юзерів по нікнейму
-                const response = await fetch(
-                    `${BASE_URL}/users/search?query=${encodeURIComponent(query)}`
-                );
+                const response = await fetch(`${BASE_URL}/users/search?query=${encodeURIComponent(query)}`);
+                if (!response.ok) { window.location.href = 'p_error.html'; return; }
                 const users = await response.json();
-
                 if (!users.length) {
                     resultsDiv.innerHTML = '<p class="status-msg">No users found.</p>';
                     return;
                 }
-
                 resultsDiv.innerHTML = '';
                 const grid = document.createElement('div');
                 grid.className = 'results-grid';
-
                 users.forEach(user => {
                     const card = document.createElement('div');
                     card.className = 'user-card';
                     card.innerHTML = `
                         <div class="user-avatar"></div>
-                        <div>
-                            <div style="font-weight:bold;">${user.username}</div>
-                            <div style="font-size:0.8rem; color:var(--text-sec);">ID: ${user.id}</div>
+                        <div class="user-info">
+                            <div class="user-name" title="${user.username}">${user.username}</div>
+                            <div class="user-id">ID: ${user.id}</div>
                         </div>
-                        <button class="btn-add" id="btn-${user.id}" onclick="addFriend(${user.id})">
-                            Add
-                        </button>`;
+                        <button class="btn-add" id="btn-${user.id}" onclick="addFriend(${user.id})">Add</button>`;
                     grid.appendChild(card);
                 });
-
                 resultsDiv.appendChild(grid);
-
             } catch (error) {
                 console.error('Search error:', error);
-                resultsDiv.innerHTML = '<p style="color:red;">Server error.</p>';
+                window.location.href = 'p_error.html';
             }
         }
 
@@ -157,30 +239,19 @@
                 window.location.href = 'login.html';
                 return;
             }
-
             const btn = document.getElementById(`btn-${friendId}`);
             btn.disabled = true;
             btn.textContent = 'Sending...';
-
             try {
-                // POST /users/friends/request/{friend_id} — надіслати запит дружби
                 const resp = await fetch(`${BASE_URL}/users/friends/request/${friendId}`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-
-                if (resp.ok || resp.status === 201) {
-                    btn.textContent = 'Sent ✓';
-                } else {
-                    const data = await resp.json();
-                    btn.textContent = 'Add';
-                    btn.disabled = false;
-                    alert(data.detail || 'Error sending request');
-                }
+                if (!resp.ok) { window.location.href = 'p_error.html'; return; }
+                btn.textContent = 'Sent ✓';
             } catch (e) {
-                btn.textContent = 'Add';
-                btn.disabled = false;
-                alert('Server error');
+                console.error('Add friend error:', e);
+                window.location.href = 'p_error.html';
             }
         }
 

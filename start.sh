@@ -72,63 +72,72 @@ PIP=$(command -v pip3 || command -v pip)
 # 5. Перевірка і встановлення бібліотек
 # ════════════════════════════════════════════════
 
-# Всі потрібні пакети (назва для import : назва для pip install)
-declare -A PACKAGES=(
-    ["fastapi"]="fastapi==0.128.0"
-    ["uvicorn"]="uvicorn==0.40.0"
-    ["sqlalchemy"]="sqlalchemy==2.0.46"
-    ["aiosqlite"]="aiosqlite==0.22.1"
-    ["pydantic"]="pydantic==2.12.5"
-    ["pwdlib"]="pwdlib[argon2]==0.3.0"
-    ["jwt"]="PyJWT==2.11.0"
-    ["pydantic_settings"]="pydantic_settings==2.12.0"
-    ["multipart"]="python-multipart==0.0.9"
-    ["requests"]="requests==2.32.5"
-    ["greenlet"]="greenlet"
-)
-
-echo ""
-echo -e "${BLUE}📦  Checking dependencies...${NC}"
-echo ""
-
-MISSING=()
-
-for import_name in "${!PACKAGES[@]}"; do
-    pip_name="${PACKAGES[$import_name]}"
-
-    # Перевіряємо чи можна імпортувати пакет
-    if $PYTHON -c "import $import_name" &> /dev/null; then
-        echo -e "   ${GREEN}✓${NC}  $import_name"
-    else
-        echo -e "   ${RED}✗${NC}  $import_name  ${YELLOW}(missing)${NC}"
-        MISSING+=("$pip_name")
+# Якщо є requirements.txt — використовуємо його
+if [ -f "requirements.txt" ]; then
+    echo ""
+    echo -e "${BLUE}📦  Installing packages from requirements.txt...${NC}"
+    $PIP install -r requirements.txt --quiet
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}❌  Failed to install packages from requirements.txt${NC}"
+        exit 1
     fi
-done
+    echo -e "${GREEN}✓  All packages installed!${NC}"
+else
+    # Інакше перевіряємо кожен пакет окремо
+    # Список потрібних пакетів (назва для import : назва для pip install)
+    declare -A PACKAGES=(
+        ["fastapi"]="fastapi==0.128.0"
+        ["uvicorn"]="uvicorn==0.40.0"
+        ["sqlalchemy"]="sqlalchemy==2.0.46"
+        ["aiosqlite"]="aiosqlite==0.22.1"
+        ["pydantic"]="pydantic==2.12.5"
+        ["pwdlib"]="pwdlib[argon2]==0.3.0"
+        ["jwt"]="PyJWT==2.11.0"
+        ["pydantic_settings"]="pydantic_settings==2.12.0"
+        ["multipart"]="python-multipart==0.0.9"
+        ["requests"]="requests==2.32.5"
+        ["greenlet"]="greenlet"
+    )
 
-# ── Якщо є відсутні пакети — встановлюємо їх ──
-if [ ${#MISSING[@]} -gt 0 ]; then
     echo ""
-    echo -e "${YELLOW}⬇️   Installing missing packages...${NC}"
+    echo -e "${BLUE}📦  Checking dependencies...${NC}"
     echo ""
 
-    for pkg in "${MISSING[@]}"; do
-        echo -e "   Installing ${BLUE}$pkg${NC}..."
-        $PIP install "$pkg" --quiet
+    MISSING=()
 
-        if [ $? -eq 0 ]; then
-            echo -e "   ${GREEN}✓  $pkg installed${NC}"
+    for import_name in "${!PACKAGES[@]}"; do
+        pip_name="${PACKAGES[$import_name]}"
+
+        if $PYTHON -c "import $import_name" &> /dev/null; then
+            echo -e "   ${GREEN}✓${NC}  $import_name"
         else
-            echo -e "   ${RED}❌  Failed to install $pkg${NC}"
-            echo "       Try manually: pip install $pkg"
-            exit 1
+            echo -e "   ${RED}✗${NC}  $import_name  ${YELLOW}(missing)${NC}"
+            MISSING+=("$pip_name")
         fi
     done
 
-    echo ""
-    echo -e "${GREEN}✓  All dependencies installed!${NC}"
-else
-    echo ""
-    echo -e "${GREEN}✓  All dependencies are present!${NC}"
+    if [ ${#MISSING[@]} -gt 0 ]; then
+        echo ""
+        echo -e "${YELLOW}⬇️   Installing missing packages...${NC}"
+        echo ""
+
+        for pkg in "${MISSING[@]}"; do
+            echo -e "   Installing ${BLUE}$pkg${NC}..."
+            $PIP install "$pkg" --quiet
+            if [ $? -eq 0 ]; then
+                echo -e "   ${GREEN}✓  $pkg installed${NC}"
+            else
+                echo -e "   ${RED}❌  Failed to install $pkg${NC}"
+                echo "       Try manually: pip install $pkg"
+                exit 1
+            fi
+        done
+        echo ""
+        echo -e "${GREEN}✓  All dependencies installed!${NC}"
+    else
+        echo ""
+        echo -e "${GREEN}✓  All dependencies are present!${NC}"
+    fi
 fi
 
 # ════════════════════════════════════════════════
@@ -147,13 +156,13 @@ if [ -z "$INDEX_PATH" ]; then
 fi
 
 # ════════════════════════════════════════════════
-# 7. Запускаємо uvicorn у фоні
+# 7. Запускаємо uvicorn через python -m у фоні
 # ════════════════════════════════════════════════
 echo ""
 echo -e "${GREEN}🚀  Starting backend on http://127.0.0.1:8000${NC}"
 echo ""
 
-uvicorn main:app --reload --host 127.0.0.1 --port 8000 &
+$PYTHON -m uvicorn main:app --reload --host 127.0.0.1 --port 8000 &
 SERVER_PID=$!
 
 # ════════════════════════════════════════════════
@@ -171,7 +180,6 @@ for i in {1..20}; do
         break
     fi
 
-    # Перевіряємо чи процес ще живий
     if ! kill -0 $SERVER_PID 2>/dev/null; then
         echo ""
         echo -e "${RED}❌  Server crashed on startup.${NC}"
@@ -196,10 +204,12 @@ if [ -n "$INDEX_PATH" ]; then
     echo -e "${GREEN}🌐  Opening browser...${NC}"
 
     case "$(uname -s)" in
-        Darwin)            open "file://$INDEX_PATH" ;;
-        Linux)             xdg-open "file://$INDEX_PATH" 2>/dev/null || \
-                           sensible-browser "file://$INDEX_PATH" 2>/dev/null ;;
-        MINGW*|CYGWIN*)    start "$INDEX_PATH" ;;
+        Darwin)    open "file://$INDEX_PATH" ;;
+        Linux)     xdg-open "file://$INDEX_PATH" 2>/dev/null || \
+                   sensible-browser "file://$INDEX_PATH" 2>/dev/null || \
+                   echo -e "${YELLOW}   Could not open browser. Open manually: $INDEX_PATH${NC}" ;;
+        MINGW*|CYGWIN*|MSYS*) start "$INDEX_PATH" ;;
+        *)         echo -e "${YELLOW}   Please open your browser and navigate to: file://$INDEX_PATH${NC}" ;;
     esac
 fi
 
@@ -212,8 +222,7 @@ echo -e "${GREEN}  ✓  MovieMatch is running!${NC}"
 echo -e "${GREEN}────────────────────────────────────────${NC}"
 echo -e "  Backend  : ${BLUE}http://127.0.0.1:8000${NC}"
 echo -e "  API docs : ${BLUE}http://127.0.0.1:8000/docs${NC}"
-[ -n "$INDEX_PATH" ] && \
-echo -e "  Frontend : ${BLUE}file://$INDEX_PATH${NC}"
+[ -n "$INDEX_PATH" ] && echo -e "  Frontend : ${BLUE}file://$INDEX_PATH${NC}"
 echo -e "${GREEN}────────────────────────────────────────${NC}"
 echo ""
 echo "  Press Ctrl+C to stop."

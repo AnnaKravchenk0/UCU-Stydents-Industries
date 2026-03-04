@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,25 +8,26 @@
     <style>
         .profile-container {
             display: grid;
-            grid-template-columns: 320px 1fr;
-            gap: 30px;
+            grid-template-columns: 300px 1fr;
+            gap: 1.5rem;
+            width: 100%;
             max-width: 1400px;
-            margin: 40px auto;
-            padding: 0 20px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
         }
 
-        /* ── Ліва панель ── */
+        /* Ліва панель */
         .friends-sidebar {
             display: flex;
             flex-direction: column;
-            gap: 25px;
+            gap: 1.5rem;
         }
 
         .sidebar-block {
             background: rgba(36, 30, 56, 0.8);
             backdrop-filter: blur(20px);
-            padding: 25px;
-            border-radius: 30px;
+            padding: 1.5rem;
+            border-radius: 1.5rem;
             border: 1px solid rgba(184, 59, 136, 0.3);
         }
 
@@ -34,7 +35,7 @@
             font-size: 1.1rem;
             font-weight: 700;
             color: white;
-            margin-bottom: 18px;
+            margin-bottom: 1rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -43,224 +44,234 @@
         .badge {
             background: var(--accent-pink);
             color: white;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 700;
-            padding: 2px 8px;
-            border-radius: 20px;
-            min-width: 22px;
+            padding: 0.15rem 0.5rem;
+            border-radius: 1rem;
+            min-width: 1.5rem;
             text-align: center;
         }
 
         .friend-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px;
-            margin-bottom: 8px;
-            border-radius: 18px;
+            gap: 0.8rem;
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            border-radius: 1rem;
             cursor: pointer;
             transition: 0.25s;
             border: 1px solid transparent;
         }
         .friend-item:last-child { margin-bottom: 0; }
-        .friend-item:hover  { background: rgba(255,255,255,0.05); }
-        .friend-item.active { background: rgba(184,59,136,0.2); border-color: var(--accent-pink); }
+        .friend-item:hover { background: rgba(255,255,255,0.05); }
+        .friend-item.active {
+            background: rgba(184,59,136,0.2);
+            border-color: var(--accent-pink);
+        }
 
         .avatar-circle {
-            width: 42px;
-            height: 42px;
+            width: 2.5rem;
+            height: 2.5rem;
             background: var(--accent-pink);
             border-radius: 50%;
-            flex-shrink: 0;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
             font-size: 1rem;
             color: white;
+            flex-shrink: 0;
         }
 
-        .friend-name { font-weight: 600; font-size: 0.95rem; }
-        .friend-sub  { font-size: 0.78rem; color: var(--text-sec); margin-top: 2px; }
+        .friend-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .friend-sub {
+            font-size: 0.7rem;
+            color: var(--text-sec);
+        }
 
         .request-actions {
             display: flex;
-            gap: 8px;
+            gap: 0.5rem;
             margin-left: auto;
-            flex-shrink: 0;
         }
 
         .btn-accept {
             background: #2ecc71;
             color: white;
             border: none;
-            padding: 6px 14px;
-            border-radius: 12px;
+            padding: 0.3rem 0.8rem;
+            border-radius: 0.7rem;
             cursor: pointer;
-            font-size: 0.82rem;
+            font-size: 0.75rem;
             font-weight: 600;
-            transition: 0.2s;
         }
-        .btn-accept:hover { background: #27ae60; transform: scale(1.05); }
-
         .btn-reject {
             background: transparent;
             color: #e74c3c;
             border: 1px solid #e74c3c;
-            padding: 6px 14px;
-            border-radius: 12px;
+            padding: 0.3rem 0.8rem;
+            border-radius: 0.7rem;
             cursor: pointer;
-            font-size: 0.82rem;
+            font-size: 0.75rem;
             font-weight: 600;
-            transition: 0.2s;
         }
-        .btn-reject:hover { background: rgba(231,76,60,0.15); transform: scale(1.05); }
 
         .btn-unfriend {
             background: transparent;
             color: var(--text-sec);
             border: 1px solid #444;
-            padding: 4px 10px;
-            border-radius: 10px;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.6rem;
             cursor: pointer;
-            font-size: 0.75rem;
-            transition: 0.2s;
+            font-size: 0.7rem;
             margin-left: auto;
-            flex-shrink: 0;
             opacity: 0;
+            transition: opacity 0.2s;
         }
         .friend-item:hover .btn-unfriend { opacity: 1; }
         .btn-unfriend:hover { color: #e74c3c; border-color: #e74c3c; }
 
-        /* ── Права панель ── */
+        /* Права панель */
         .movies-feed {
             background: rgba(36, 30, 56, 0.5);
-            padding: 40px;
-            border-radius: 40px;
+            padding: 1.5rem;
+            border-radius: 1.5rem;
             border: 1px solid rgba(255,255,255,0.05);
+            width: 100%;
         }
 
         .feed-header {
-            margin-bottom: 25px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
             display: flex;
-            align-items: flex-start;
             justify-content: space-between;
-            gap: 20px;
+            align-items: center;
             flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
-        .feed-header-text h1 { margin-bottom: 6px; }
+        .feed-header-text h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.2rem;
+        }
 
-        /* ── Кнопка перемикання All / Common ── */
         .toggle-btn {
             display: flex;
             background: rgba(255,255,255,0.05);
-            border-radius: 20px;
-            padding: 4px;
+            border-radius: 2rem;
+            padding: 0.2rem;
             border: 1px solid rgba(255,255,255,0.1);
-            flex-shrink: 0;
-            align-self: center;
         }
 
         .toggle-btn button {
             background: transparent;
             border: none;
             color: var(--text-sec);
-            padding: 8px 18px;
-            border-radius: 16px;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
             cursor: pointer;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 600;
-            transition: 0.2s;
             white-space: nowrap;
         }
-
         .toggle-btn button.active {
             background: var(--accent-pink);
             color: white;
         }
 
-        /* ── Сітка фільмів ── */
+        .search-section {
+            margin-bottom: 1.5rem;
+        }
+        .search-input {
+            width: 100%;
+            max-width: 350px;
+            padding: 0.6rem 1rem;
+            border-radius: 2rem;
+            border: 1px solid #444;
+            background: rgba(255,255,255,0.05);
+            color: white;
+            font-size: 0.9rem;
+        }
+
         .movies-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 1.2rem;
+            width: 100%;
         }
 
         .movie-card {
             background: #1a162b;
-            border-radius: 20px;
+            border-radius: 1rem;
             overflow: hidden;
-            transition: 0.3s;
+            transition: transform 0.3s;
             cursor: pointer;
         }
-        .movie-card:hover { transform: translateY(-5px); }
+        .movie-card:hover { transform: translateY(-3px); }
 
         .movie-poster {
             width: 100%;
-            height: 260px;
+            height: 200px;
             object-fit: cover;
-            display: block;
         }
 
         .movie-poster-placeholder {
             width: 100%;
-            height: 260px;
+            height: 200px;
             background: #2a2440;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #aaa;
-            font-size: 0.85rem;
-            padding: 10px;
+            font-size: 0.8rem;
+            padding: 0.5rem;
             text-align: center;
         }
 
-        .movie-info { padding: 12px 15px; }
+        .movie-info {
+            padding: 0.8rem;
+        }
 
         .movie-rating-tag {
             display: inline-block;
-            background: rgba(184, 59, 136, 0.2);
+            background: rgba(184,59,136,0.2);
             color: var(--accent-pink);
-            border-radius: 10px;
-            padding: 2px 7px;
-            font-size: 0.75rem;
+            border-radius: 0.6rem;
+            padding: 0.15rem 0.5rem;
+            font-size: 0.7rem;
             font-weight: 600;
-            margin-top: 4px;
+            margin-top: 0.2rem;
         }
 
-        /* Спільний значок */
         .common-badge {
             display: inline-block;
-            background: rgba(46, 204, 113, 0.2);
+            background: rgba(46,204,113,0.2);
             color: #2ecc71;
-            border-radius: 10px;
-            padding: 2px 8px;
-            font-size: 0.72rem;
+            border-radius: 0.6rem;
+            padding: 0.15rem 0.5rem;
+            font-size: 0.65rem;
             font-weight: 700;
-            margin-top: 4px;
-            margin-left: 4px;
         }
 
         .empty-msg {
             color: var(--text-sec);
             text-align: center;
-            padding: 50px 0;
+            padding: 3rem 0;
             grid-column: 1/-1;
-            line-height: 1.8;
         }
-        .empty-msg a { color: var(--accent-pink); text-decoration: none; }
 
-        /* ── Пагінація ── */
         .pagination {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            margin-top: 35px;
-            padding-top: 25px;
+            gap: 0.8rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
             border-top: 1px solid rgba(255,255,255,0.08);
         }
 
@@ -268,75 +279,91 @@
             background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.1);
             color: white;
-            padding: 10px 20px;
-            border-radius: 15px;
+            padding: 0.5rem 1.2rem;
+            border-radius: 1rem;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             font-weight: 600;
-            transition: 0.2s;
         }
         .page-btn:hover:not(:disabled) {
             background: rgba(184,59,136,0.3);
             border-color: var(--accent-pink);
         }
-        .page-btn:disabled {
-            opacity: 0.3;
-            cursor: default;
-        }
-        .page-btn.active {
-            background: var(--accent-pink);
-            border-color: var(--accent-pink);
-        }
+        .page-btn:disabled { opacity: 0.3; cursor: default; }
 
         .page-info {
             color: var(--text-sec);
-            font-size: 0.9rem;
-            min-width: 100px;
+            font-size: 0.8rem;
+            min-width: 6rem;
             text-align: center;
         }
 
-        /* Toast */
         .toast {
             position: fixed;
-            bottom: 35px;
+            bottom: 2rem;
             left: 50%;
             transform: translateX(-50%) translateY(20px);
             background: #2ecc71;
             color: white;
-            padding: 11px 28px;
-            border-radius: 30px;
+            padding: 0.8rem 2rem;
+            border-radius: 2rem;
             font-weight: 600;
-            font-size: 0.9rem;
             opacity: 0;
             transition: all 0.3s;
             z-index: 1000;
-            pointer-events: none;
         }
-        .toast.show  { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
         .toast.error { background: #e74c3c; }
+
+        /* Адаптація */
+        @media (max-width: 900px) {
+            .profile-container {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .profile-container {
+                padding: 0 1rem;
+                margin: 1rem auto;
+            }
+            .movies-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+            .movie-poster, .movie-poster-placeholder {
+                height: 180px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .movies-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 0.8rem;
+            }
+            .movie-poster, .movie-poster-placeholder {
+                height: 150px;
+            }
+            .feed-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .toggle-btn {
+                width: 100%;
+            }
+            .toggle-btn button {
+                flex: 1;
+            }
+            .search-input {
+                max-width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
-    <header>
-        <nav class="top-nav">
-            <a href="index.html" class="logo">MovieMatch</a>
-            <ul class="nav-links">
-                <li><a href="index.html">Popular</a></li>
-                <li><a href="index.html#about">About</a></li>
-                <li><a href="index.html#contacts">Contacts</a></li>
-                <li><a href="search_friends.html">Search Friends</a></li>
-                <li><a href="my_films.html">My Collection</a></li>
-                <li><a href="profile.html" style="color:var(--accent-pink);">Friends</a></li>
-            </ul>
-        </nav>
-    </header>
-
     <div class="profile-container">
-
-        <!-- ── Ліва панель ── -->
+        <!-- Ліва панель -->
         <aside class="friends-sidebar">
-
-            <!-- Вхідні запити -->
             <div class="sidebar-block" id="requests-block" style="display:none;">
                 <div class="sidebar-block-title">
                     Incoming Requests
@@ -345,24 +372,22 @@
                 <div id="requests-list"></div>
             </div>
 
-            <!-- Список друзів -->
             <div class="sidebar-block">
                 <div class="sidebar-block-title">My Friends</div>
                 <div id="friends-list">
                     <p style="color:var(--text-sec);">Loading...</p>
                 </div>
                 <a href="search_friends.html" style="
-                    display:block; margin-top:15px; text-align:center;
-                    padding:10px; border:2px dashed rgba(184,59,136,0.5);
-                    border-radius:15px; color:var(--accent-pink);
-                    text-decoration:none; font-size:0.9rem; transition:0.2s;">
+                    display:block; margin-top:1rem; text-align:center;
+                    padding:0.6rem; border:2px dashed rgba(184,59,136,0.5);
+                    border-radius:1rem; color:var(--accent-pink);
+                    text-decoration:none; font-size:0.9rem;">
                     + Find Friends
                 </a>
             </div>
-
         </aside>
 
-        <!-- ── Права панель ── -->
+        <!-- Права панель -->
         <main class="movies-feed">
             <div class="feed-header">
                 <div class="feed-header-text">
@@ -370,46 +395,46 @@
                     <p id="selected-friend-stats" style="color:var(--text-sec);"></p>
                 </div>
 
-                <!-- Кнопка перемикання — прихована поки не вибраний друг -->
                 <div class="toggle-btn" id="toggle-btn" style="display:none;">
-                    <button id="btn-all"    class="active" onclick="switchMode('all')">
-                        🎬 All Movies
-                    </button>
-                    <button id="btn-common" onclick="switchMode('common')">
-                        ✨ Common
-                    </button>
+                    <button id="btn-all" class="active" onclick="switchMode('all')">🎬 All Movies</button>
+                    <button id="btn-common" onclick="switchMode('common')">✨ Common</button>
                 </div>
+            </div>
+
+            <div class="search-section" id="search-section" style="display:none;">
+                <input type="text" id="searchMovies" class="search-input" placeholder="🔍 Search in these movies..." oninput="filterMovies()">
             </div>
 
             <div class="movies-grid" id="movies-container"></div>
 
-            <!-- Пагінація -->
             <div class="pagination" id="pagination" style="display:none;">
                 <button class="page-btn" id="btn-prev" onclick="changePage(-1)">← Prev</button>
                 <span class="page-info" id="page-info">Page 1 / 1</span>
                 <button class="page-btn" id="btn-next" onclick="changePage(1)">Next →</button>
             </div>
         </main>
-
     </div>
 
     <div class="toast" id="toast"></div>
 
+    <script src="header.js"></script>
     <script>
+<<<<<<< HEAD
+        // Ваш існуючий JavaScript для profile.html (без змін)
+        const BASE_URL = 'http://127.0.0.1:8000';
+=======
         const BASE_URL = 'https://ucu-stydents-industries.onrender.com';
+>>>>>>> origin/deploy
         const token    = localStorage.getItem('token');
 
-        // Поточний вибраний друг і його дані
-        let currentFriend   = null;  // { id, username }
-        let allMovies       = [];    // всі фільми друга
-        let commonMovies    = [];    // спільні фільми
-        let currentMode     = 'all'; // 'all' або 'common'
-        const PER_PAGE      = 20;    // фільмів на сторінку
-        let currentPage     = 1;     // поточна сторінка'
+        let currentFriend   = null;
+        let allMovies       = [];
+        let commonMovies    = [];
+        let currentMode     = 'all';
+        let filteredMovies  = [];
+        const PER_PAGE      = 20;
+        let currentPage     = 1;
 
-        // ─────────────────────────────────────────
-        // Старт
-        // ─────────────────────────────────────────
         async function init() {
             if (!token) {
                 window.location.href = 'login.html';
@@ -441,9 +466,6 @@
             }
         }
 
-        // ─────────────────────────────────────────
-        // Вхідні запити
-        // ─────────────────────────────────────────
         function renderRequests(requests) {
             const block = document.getElementById('requests-block');
             const list  = document.getElementById('requests-list');
@@ -469,9 +491,7 @@
                         <div class="friend-sub">wants to be friends</div>
                     </div>
                     <div class="request-actions">
-                        <button class="btn-accept" onclick="acceptRequest(${user.id}, '${user.username}')">
-                            ✓ Accept
-                        </button>
+                        <button class="btn-accept" onclick="acceptRequest(${user.id}, '${user.username}')">✓ Accept</button>
                         <button class="btn-reject" onclick="rejectRequest(${user.id})">✗</button>
                     </div>`;
                 list.appendChild(div);
@@ -519,9 +539,6 @@
             if (!remaining) document.getElementById('requests-block').style.display = 'none';
         }
 
-        // ─────────────────────────────────────────
-        // Список друзів
-        // ─────────────────────────────────────────
         function renderFriends(friends) {
             const list = document.getElementById('friends-list');
             if (!friends.length) {
@@ -550,10 +567,7 @@
                     <div class="friend-name">${friend.username}</div>
                     <div class="friend-sub">click to see movies</div>
                 </div>
-                <button class="btn-unfriend"
-                    onclick="unfriend(event, ${friend.id}, '${friend.username}')">
-                    Remove
-                </button>`;
+                <button class="btn-unfriend" onclick="unfriend(event, ${friend.id}, '${friend.username}')">Remove</button>`;
             div.onclick = (e) => {
                 if (e.target.classList.contains('btn-unfriend')) return;
                 selectFriend(friend, div);
@@ -582,28 +596,24 @@
             } catch (e) { showToast('Server error', true); }
         }
 
-        // ─────────────────────────────────────────
-        // Вибір друга — завантажуємо всі і спільні фільми
-        // ─────────────────────────────────────────
         async function selectFriend(friend, element) {
             document.querySelectorAll('.friend-item').forEach(i => i.classList.remove('active'));
             element.classList.add('active');
 
             currentFriend = friend;
             currentMode   = 'all';
-            currentPage   = 1;  // скидаємо сторінку при зміні друга
+            currentPage   = 1;
 
             document.getElementById('selected-friend-name').textContent = `${friend.username}'s Movies`;
             document.getElementById('selected-friend-stats').textContent = 'Loading...';
             document.getElementById('movies-container').innerHTML = '';
             document.getElementById('toggle-btn').style.display = 'none';
+            document.getElementById('search-section').style.display = 'none';
 
-            // Скидаємо кнопки на "All"
             document.getElementById('btn-all').classList.add('active');
             document.getElementById('btn-common').classList.remove('active');
 
             try {
-                // Паралельно завантажуємо всі фільми друга і спільні
                 const [allResp, commonResp] = await Promise.all([
                     fetch(`${BASE_URL}/movies/${friend.id}/liked`),
                     fetch(`${BASE_URL}/movies/common/${friend.id}`, {
@@ -614,12 +624,12 @@
                 allMovies    = await allResp.json();
                 commonMovies = await commonResp.json();
 
-                // Показуємо кнопку тільки якщо є хоч один фільм
                 if (allMovies.length > 0) {
                     document.getElementById('toggle-btn').style.display = 'flex';
+                    document.getElementById('search-section').style.display = 'block';
                 }
 
-                renderMovies(allMovies, 'all');
+                filterMovies();
 
             } catch (e) {
                 document.getElementById('selected-friend-stats').textContent = '';
@@ -628,106 +638,74 @@
             }
         }
 
-        // ─────────────────────────────────────────
-        // Перемикання режиму All / Common
-        // ─────────────────────────────────────────
+        function filterMovies() {
+            const query = document.getElementById('searchMovies')?.value.trim().toLowerCase() || '';
+            const source = currentMode === 'all' ? allMovies : commonMovies;
+            if (!query) {
+                filteredMovies = [...source];
+            } else {
+                filteredMovies = source.filter(m =>
+                    m.movie_name.toLowerCase().includes(query)
+                );
+            }
+            currentPage = 1;
+            renderMovies(filteredMovies, currentMode);
+        }
+
         function switchMode(mode) {
             if (mode === currentMode) return;
             currentMode = mode;
-            currentPage = 1;  // скидаємо на першу сторінку
-
-            document.getElementById('btn-all').classList.toggle('active',    mode === 'all');
+            currentPage = 1;
+            document.getElementById('btn-all').classList.toggle('active', mode === 'all');
             document.getElementById('btn-common').classList.toggle('active', mode === 'common');
-
-            if (mode === 'all') {
-                renderMovies(allMovies, 'all');
-            } else {
-                renderMovies(commonMovies, 'common');
-            }
+            filterMovies();
         }
 
-        // Перехід на сторінку (+1 вперед, -1 назад)
-        function changePage(direction) {
-            const movies = currentMode === 'all' ? allMovies : commonMovies;
-            const totalPages = Math.ceil(movies.length / PER_PAGE);
-            currentPage = Math.max(1, Math.min(totalPages, currentPage + direction));
-            renderMovies(movies, currentMode);
-            // Скролимо вгору до правої панелі
-            document.querySelector('.movies-feed').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        // ─────────────────────────────────────────
-        // Рендер карток фільмів з пагінацією
-        // mode: 'all' або 'common'
-        // ─────────────────────────────────────────
         function renderMovies(movies, mode) {
             const container  = document.getElementById('movies-container');
             const pagination = document.getElementById('pagination');
             const stats      = document.getElementById('selected-friend-stats');
             const name       = currentFriend?.username || '';
 
-            // Оновлюємо статистику
             if (mode === 'all') {
-                stats.textContent = `${movies.length} movie${movies.length !== 1 ? 's' : ''} liked`;
+                stats.textContent = `${movies.length} movie${movies.length !== 1 ? 's' : ''} found`;
             } else {
-                stats.textContent = commonMovies.length > 0
-                    ? `${commonMovies.length} movie${commonMovies.length !== 1 ? 's' : ''} in common with you`
-                    : `No movies in common with ${name} yet`;
+                stats.textContent = movies.length > 0
+                    ? `${movies.length} common movie${movies.length !== 1 ? 's' : ''} with you`
+                    : `No common movies with ${name}`;
             }
 
             if (!movies.length) {
                 container.innerHTML = `
                     <div class="empty-msg">
                         ${mode === 'common'
-                            ? `No common movies yet.<br>Go to <a href="choose.html">Choose</a> and like some movies!`
-                            : `${name} hasn't liked any movies yet.`
-                        }
+                            ? 'No common movies yet.'
+                            : `${name} hasn't liked any movies matching your search.`}
                     </div>`;
                 pagination.style.display = 'none';
                 return;
             }
 
-            // Пагінація — беремо тільки 20 фільмів для поточної сторінки
             const totalPages = Math.ceil(movies.length / PER_PAGE);
             const start      = (currentPage - 1) * PER_PAGE;
             const pageMovies = movies.slice(start, start + PER_PAGE);
 
-            // Оновлюємо кнопки пагінації
             if (movies.length > PER_PAGE) {
                 pagination.style.display = 'flex';
-                document.getElementById('page-info').textContent =
-                    `Page ${currentPage} / ${totalPages}`;
+                document.getElementById('page-info').textContent = `Page ${currentPage} / ${totalPages}`;
                 document.getElementById('btn-prev').disabled = currentPage === 1;
                 document.getElementById('btn-next').disabled = currentPage === totalPages;
             } else {
                 pagination.style.display = 'none';
             }
 
-            // Множина id спільних фільмів — щоб позначати їх значком
             const commonIds = new Set(commonMovies.map(m => m.id));
 
             container.innerHTML = pageMovies.map(m => {
-                // poster_url зберігаємо в БД — використовуємо його напряму
-                // якщо немає — будуємо з poster_path
-                const posterUrl = m.poster_url
-                    || (m.poster_path
-                        ? `https://image.tmdb.org/t/p/w500${m.poster_path}`
-                        : '');
-
-                const rating = m.vote_average && m.vote_average > 0
-                    ? `<span class="movie-rating-tag">★ ${m.vote_average.toFixed(1)}</span>`
-                    : '';
-
-                const year = m.release_date
-                    ? `<span style="color:var(--text-sec); font-size:0.8rem;">
-                        ${m.release_date.split('-')[0]}
-                       </span>`
-                    : '';
-
-                // Значок "спільний" якщо ми в режимі "all" і фільм є у спільних
-                const commonMark = (mode === 'all' && commonIds.has(m.id))
-                    ? `<span class="common-badge">✨ common</span>`
-                    : '';
+                const posterUrl = m.poster_url || (m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : '');
+                const rating = m.vote_average > 0 ? `<span class="movie-rating-tag">★ ${m.vote_average.toFixed(1)}</span>` : '';
+                const year = m.release_date ? `<span style="color:var(--text-sec);">${m.release_date.split('-')[0]}</span>` : '';
+                const commonMark = (mode === 'all' && commonIds.has(m.id)) ? `<span class="common-badge">✨ common</span>` : '';
 
                 return `
                 <div class="movie-card" title="${m.overview || ''}">
@@ -736,41 +714,40 @@
                         : `<div class="movie-poster-placeholder">${m.movie_name}</div>`
                     }
                     <div class="movie-info">
-                        <div style="font-weight:600; font-size:0.95rem;
-                            white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                        <div style="font-weight:600; font-size:0.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                             ${m.movie_name}
                         </div>
-                        <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:4px;">
-                            ${year}
-                            ${rating}
-                            ${commonMark}
+                        <div style="display:flex; align-items:center; gap:0.3rem; flex-wrap:wrap; margin-top:0.2rem;">
+                            ${year} ${rating} ${commonMark}
                         </div>
                     </div>
                 </div>`;
             }).join('');
         }
 
-        // ─────────────────────────────────────────
-        // Очистити праву панель
-        // ─────────────────────────────────────────
+        function changePage(direction) {
+            const totalPages = Math.ceil(filteredMovies.length / PER_PAGE);
+            currentPage = Math.max(1, Math.min(totalPages, currentPage + direction));
+            renderMovies(filteredMovies, currentMode);
+        }
+
         function resetFeed() {
             currentFriend = null;
-            allMovies     = [];
-            commonMovies  = [];
+            allMovies = [];
+            commonMovies = [];
+            filteredMovies = [];
             document.getElementById('selected-friend-name').textContent = 'Select a friend to see their movies';
             document.getElementById('selected-friend-stats').textContent = '';
             document.getElementById('movies-container').innerHTML = '';
-            document.getElementById('toggle-btn').style.display  = 'none';
-            document.getElementById('pagination').style.display  = 'none';
+            document.getElementById('toggle-btn').style.display = 'none';
+            document.getElementById('search-section').style.display = 'none';
+            document.getElementById('pagination').style.display = 'none';
         }
 
-        // ─────────────────────────────────────────
-        // Toast
-        // ─────────────────────────────────────────
         function showToast(msg, isError = false) {
             const toast = document.getElementById('toast');
             toast.textContent = msg;
-            toast.className   = 'toast show' + (isError ? ' error' : '');
+            toast.className = 'toast show' + (isError ? ' error' : '');
             setTimeout(() => { toast.className = 'toast'; }, 2500);
         }
 

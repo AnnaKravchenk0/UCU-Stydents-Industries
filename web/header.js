@@ -1,9 +1,11 @@
 function renderHeader() {
+    const existingHeader = document.querySelector('header');
+    if (existingHeader) existingHeader.remove();
+
     const header = document.createElement('header');
     const token = localStorage.getItem('token');
     const username = localStorage.getItem('username') || 'Користувач';
 
-    // Спільна частина логотипу
     let navContent = `
         <nav class="top-nav">
             <a href="index.html" class="logo">MovieMatch</a>
@@ -11,40 +13,61 @@ function renderHeader() {
                 <li><a href="index.html#popular">Popular</a></li>
                 <li><a href="index.html#about">About</a></li>
                 <li><a href="index.html#contacts">Contacts</a></li>
-            </ul>
+                <li><a href="search_results.html">Search Movies</a></li>
     `;
 
     if (token) {
-        // Шапка для ЗАЛОГІНЕНОГО користувача
         navContent += `
-            <div class="user-menu" style="display: flex; align-items: center; gap: 15px;">
-                <a href="my_films.html" style="color: white; text-decoration: none;">My Collection</a>
-                <a href="profile.html" style="color: white; text-decoration: none;">Friends</a>
-                <div class="user-info" style="display: flex; align-items: center; gap: 10px;">
-                    <span style="font-weight: bold;">${username}</span>
-                    <div class="avatar" style="width: 35px; height: 35px; background-color: var(--accent-pink); border-radius: 50%;"></div>
+                <li><a href="choose.html">Choose Movies</a></li>
+                <li><a href="my_films.html">My Collection</a></li>
+                <li><a href="search_friends.html">Search Friends</a></li>
+                <li><a href="profile.html" class="friends-link">Friends</a></li>
+            </ul> <div class="auth-lang" id="nav-right">
+                <div class="user-menu">
+                    <span class="username-display">${username}</span>
+                    <div class="user-avatar-circle">${username.charAt(0).toUpperCase()}</div>
                 </div>
-                <button onclick="logout()" class="btn-alt" style="padding: 5px 15px; cursor: pointer;">Exit</button>
-            </div>
+                <a href="#" onclick="logout()" class="logout-link">Log Out</a>
         `;
     } else {
-        // Шапка для НЕЗАЛОГІНЕНОГО користувача
         navContent += `
-            <div class="auth-buttons" style="display: flex; gap: 10px;">
-                <a href="login.html" class="btn-alt" style="text-decoration: none; padding: 8px 20px;">Log In</a>
-                <a href="signup.html" class="btn-main" style="text-decoration: none; padding: 8px 20px; background: var(--accent-pink); border-radius: 20px;">Sign Up</a>
-            </div>
+            </ul>
+            <div class="auth-lang" id="nav-right">
+                <a href="login.html" class="login-link">Log In</a>
+                <a href="signup.html" class="signup-btn">Sign Up</a>
         `;
     }
 
-    navContent += `</nav>`;
-    header.innerHTML = navContent;
+    navContent += `</div></nav>`;
 
-    // Вставляємо на початок body
+    const subNav = `
+        <nav class="sub-nav">
+            <a href="index.html" class="active-sub" onclick="goToChoose()">Movies</a>
+            <a href="development.html">Books</a>
+            <a href="development.html">Cartoons</a>
+            <a href="development.html">Audiobooks</a>
+            <a href="development.html">Podcasts</a>
+            <a href="development.html">Playlists</a>
+            <a href="development.html">Show</a>
+            <a href="development.html">TV shows</a>
+        </nav>
+    `;
+
+    header.innerHTML = navContent + subNav;
     document.body.prepend(header);
+
+    // Позначити активний пункт у підменю
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    document.querySelectorAll('.sub-nav a').forEach(link => {
+        const href = link.getAttribute('href');
+        if (href === currentPage) {
+            link.classList.add('active-sub');
+        } else {
+            link.classList.remove('active-sub');
+        }
+    });
 }
 
-// Функція виходу
 function logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
@@ -52,5 +75,22 @@ function logout() {
     window.location.href = 'index.html';
 }
 
-// Запуск при завантаженні сторінки
+function goToChoose() {
+    const token = localStorage.getItem('token');
+    if (token) window.location.href = 'choose.html';
+    else window.location.href = 'login.html';
+}
+
+function setResponsiveFontSize() {
+    const width = window.innerWidth;
+    let baseSize = 16;
+    if (width <= 360) baseSize = 11;
+    else if (width <= 480) baseSize = 12;
+    else if (width <= 768) baseSize = 14;
+    else if (width <= 1024) baseSize = 15;
+    document.documentElement.style.fontSize = baseSize + 'px';
+}
+
+window.addEventListener('load', setResponsiveFontSize);
+window.addEventListener('resize', setResponsiveFontSize);
 document.addEventListener('DOMContentLoaded', renderHeader);

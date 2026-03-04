@@ -1,49 +1,77 @@
-# MovieMatch - Backend API
+# MovieMatch – Technical Documentation
 
-This is the backend service for a social movie-tracking application. It handles user authentication, movie data retrieval via external APIs, and social interactions between users.
+## 1. Project Overview
 
-## Core Capabilities
+MovieMatch is a social movie-tracking API built with **FastAPI** and **SQLAlchemy 2.0 (Async)**. It handles secure user authentication, social networking (friendships), and TMDB integration.
 
-### 1. User Management & Security
-* **Authentication**: Uses JWT (JSON Web Tokens) for secure session management.
-* **Password Security**: Implements Argon2id hashing for storing user credentials safely.
-* **Profile Management**: Support for user registration, public profile retrieval, and account deletion.
-* **User Search**: An endpoint to find other registered users by their username using case-insensitive partial matching.
+---
 
-### 2. Movie Integration
-* **TMDB Client**: A custom client that communicates with The Movie Database (TMDB) API to fetch popular movies or search for specific titles by name and year.
-* **Local Persistence**: When a user "likes" a movie, its basic metadata (ID, name, poster path) is stored in the local database to ensure data consistency even if external API data changes.
-* **User Favorites**: Allows users to maintain a personal list of "liked" movies.
+## 2. Technical Architecture
 
-### 3. Social Engine
-* **Friendship System**: A full request-response cycle for managing friends (sending requests, accepting, or removing friendships).
-* **Common Interests**: Logic to compare two users' "liked" lists and return a list of movies they both enjoy.
+* **Framework:** FastAPI (Asynchronous).
+* **Database Layer:** SQLAlchemy Async ORM (supports PostgreSQL, MySQL, SQLite, etc.).
+* **Validation:** Pydantic models for request/response filtering.
+* **Service Layer:** Business logic is decoupled from route handlers.
 
-## Technical Architecture
+---
 
-* **Framework**: Built with **FastAPI**, utilizing asynchronous endpoints for better performance.
-* **Database**: Uses **SQLite** with **SQLAlchemy 2.0** (Async engine). The schema includes tables for users, movies, and association tables for likes and friendships.
-* **Data Validation**: **Pydantic** models (schemas) are used to validate all incoming request bodies and define outgoing response structures.
-* **Configuration**: Managed via **Pydantic Settings**, loading sensitive keys (like API tokens and secrets) from a `.env` file.
+## 3. Data Schema
 
-## Setup & Running
+The data layer consists of four primary entities managed via the ORM:
 
-### Requirements
-The service requires Python 3.10+ and the following main dependencies:
-* `fastapi`, `uvicorn`, `sqlalchemy`, `aiosqlite`, `python-jose`, `pwdlib[argon2]`, `requests`, `pydantic-settings`.
+* **Users:** Stores unique usernames and **Argon2id** password hashes.
+* **Movies:** Local cache of TMDB metadata (ID, Title, Poster).
+* **Likes:** Association table linking Users to Movies (Many-to-Many).
+* **Friendships:** Manages social links with `sender_id`, `receiver_id`, and `is_accepted` status.
 
-### Installation
-1.  **Environment Setup**:
-    Create a `.env` file in the root directory with the following variables:
-    ```env
-    SECRET_KEY=your_jwt_secret
-    TMDB_API_KEY=your_tmdb_key
-    ```
-2.  **Database**:
-    The database (`blog.db`) and its tables are automatically initialized during the application startup via the lifespan context manager.
+---
 
-### Execution
-Run the server using Uvicorn:
+## 4. Security & Authentication
+
+The system uses **JWT (JSON Web Tokens)** for secure session handling and **Argon2id** for password security.
+
+### Password Security
+
+* **No Plain Text:** Passwords are never stored raw.
+* **Secure:** Even if the database is compromised, raw passwords cannot be recovered.
+* **Resistance:** Strong protection against brute-force and rainbow table attacks.
+
+### JWT Authentication Flow
+
+1. **Login:** A user submits valid login credentials.
+2. **Verify:** The backend verifies the password hash.
+3. **Issue:** If successful, a JWT access token is generated (30-minute expiry).
+4. **Authorize:** The token must be included in the header for protected requests:
+
+```http
+Authorization: Bearer <YOUR_TOKEN>
+
+```
+
+---
+
+## 5. API Endpoints
+
+### Users & Social (`/users`)
+
+* `POST /registration`: Create a new account.
+* `POST /login`: OAuth2 compatible login (Form data).
+* `GET /me`: Retrieve private profile (**Auth Required**).
+* `POST /friends/request/{id}`: Send friend request.
+* `POST /friends/accept/{id}`: Confirm friendship.
+
+### Movies (`/movies`)
+
+* `GET /`: Search TMDB (with `name` and `year` filters).
+* `POST /like-movie`: Save movie metadata locally and link to user.
+* `GET /common/{friend_id}`: Find shared liked movies using DB joins.
+
+---
+3. **Run Server:**
+
 ```bash
 uvicorn main:app --reload
+
 ```
+The server will run at `http://127.0.0.1:8000`.
+---
