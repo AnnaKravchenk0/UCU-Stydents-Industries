@@ -56,33 +56,25 @@ header {
     white-space: nowrap;
 }
 
-.sub-nav {
+.nav-links {
     display: flex;
+    list-style: none;
+    gap: 1.5rem;
+    margin: 0 1rem;
+    flex-wrap: wrap;
     justify-content: center;
-    gap: 20px;
-    padding: 10px 0;
-    border-top: 1px solid #222;
-    margin-top: 5px;
 }
 
-.sub-nav a {
-    color: rgba(255, 255, 255, 0.4);
-    text-decoration: none;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: 0.3s;
-}
-
-.sub-nav a:hover {
-    color: var(--accent-pink);
-}
-
-.sub-nav a.active-sub {
+.nav-links a {
     color: var(--text-sec);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: color 0.3s;
+    white-space: nowrap;
 }
 
-.sub-nav a.active-sub:hover {
+.nav-links a:hover {
     color: var(--text-main);
 }
 
@@ -140,7 +132,7 @@ header {
     font-size: 1rem;
 }
 
-/* Підменю
+/* Підменю */
 .sub-nav {
     display: flex;
     justify-content: center;
@@ -171,7 +163,7 @@ header {
 
 .sub-nav a:hover {
     color: var(--accent-pink);
-} */
+}
 
 /* ===== ОСНОВНИЙ КОНТЕНТ ===== */
 main {
